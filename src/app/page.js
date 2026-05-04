@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseList from "@/components/ExpenseList";
+import BudgetSummary from "@/components/BudgetSummary";
 
 export default function Home() {
   const { user, loading: authLoading, logout } = useAuth();
@@ -61,6 +62,11 @@ export default function Home() {
           ))}
         </div>
       )}
+
+      <section className="mb-section-gap">
+        <h2 className="section-title mb-4">Presupuesto</h2>
+        <BudgetSummary refreshTrigger={refreshKey} />
+      </section>
 
       <section className="mb-section-gap">
         <ExpenseForm onExpenseAdded={() => setRefreshKey(k => k + 1)} />
