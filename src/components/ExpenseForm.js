@@ -40,7 +40,8 @@ export default function ExpenseForm({ onExpenseAdded }) {
         product,
         value: Number(value),
         categoryId,
-        paidBy
+        paidBy,
+        userEmail: user.email
       });
       setProduct("");
       setValue("");

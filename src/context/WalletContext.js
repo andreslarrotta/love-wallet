@@ -34,7 +34,21 @@ export function WalletProvider({ children }) {
       userWallets = await getUserWallets(user.email);
     }
 
-    setWallets(userWallets);
+    // Deduplicate personal wallets (React Strict Mode bug mitigation)
+    const uniqueWallets = [];
+    const seenPersonal = new Set();
+    for (const w of userWallets) {
+      if (w.type === "personal") {
+        if (!seenPersonal.has(w.members[0])) {
+          uniqueWallets.push(w);
+          seenPersonal.add(w.members[0]);
+        }
+      } else {
+        uniqueWallets.push(w);
+      }
+    }
+
+    setWallets(uniqueWallets);
     
     // Set active wallet to personal by default if not set
     if (!activeWallet) {

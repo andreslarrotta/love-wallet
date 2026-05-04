@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseList from "@/components/ExpenseList";
 import BudgetSummary from "@/components/BudgetSummary";
+import Link from "next/link";
 
 export default function Home() {
   const { user, loading: authLoading, logout } = useAuth();
@@ -75,22 +76,22 @@ export default function Home() {
       <section>
         <div className="flex justify-between items-center mb-item-gap">
           <h2 className="section-title">Últimos Gastos</h2>
-          <a href="/config" className="text-sm font-semibold text-primary flex items-center gap-1">
+          <Link href="/config" className="text-sm font-semibold text-primary flex items-center gap-1">
             ⚙️ Configurar
-          </a>
+          </Link>
         </div>
         <ExpenseList refreshTrigger={refreshKey} />
       </section>
 
       {/* Bottom Nav Mockup */}
       <nav className="fixed bottom-0 left-0 right-0 h-[72px] bg-white border-t border-divider flex items-center justify-around px-4 shadow-nav-bar">
-        <a href="/" className="bg-primary/20 px-5 py-2 rounded-pill flex items-center gap-2">
+        <Link href="/" className="bg-primary/20 px-5 py-2 rounded-pill flex items-center gap-2">
           <span className="text-primary text-xl">🏠</span>
           <span className="text-xs font-bold text-text-primary">Inicio</span>
-        </a>
-        <a href="/config" className="text-icon-muted text-xl flex flex-col items-center">
+        </Link>
+        <Link href="/config" className="text-icon-muted text-xl flex flex-col items-center">
           ⚙️
-        </a>
+        </Link>
       </nav>
     </div>
   );

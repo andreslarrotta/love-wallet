@@ -59,6 +59,10 @@ export const getCategories = async (walletId) => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
+export const updateCategory = async (id, categoryData) => {
+  return await updateDoc(doc(db, "categories", id), categoryData);
+};
+
 export const deleteCategory = async (id) => {
   return await deleteDoc(doc(db, "categories", id));
 };
