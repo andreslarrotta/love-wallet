@@ -8,22 +8,52 @@ import {
   query, 
   where, 
   getDocs,
-  orderBy 
+  orderBy,
+  getDoc
 } from "firebase/firestore";
 
-// --- Categories ---
-export const addCategory = async (userId, categoryData) => {
-  return await addDoc(collection(db, "categories"), {
-    ...categoryData,
-    userId,
+// --- Wallets ---
+export const createPersonalWallet = async (userEmail) => {
+  return await addDoc(collection(db, "wallets"), {
+    name: "Personal",
+    type: "personal",
+    members: [userEmail],
     createdAt: new Date()
   });
 };
 
-export const getCategories = async (userId) => {
+export const createSharedWallet = async (userEmail, partnerEmail) => {
+  return await addDoc(collection(db, "wallets"), {
+    name: "Compartida",
+    type: "shared",
+    members: [userEmail, partnerEmail],
+    createdAt: new Date()
+  });
+};
+
+export const getUserWallets = async (userEmail) => {
+  const q = query(
+    collection(db, "wallets"),
+    where("members", "array-contains", userEmail)
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+// --- Categories ---
+export const addCategory = async (walletId, categoryData) => {
+  return await addDoc(collection(db, "categories"), {
+    ...categoryData,
+    walletId,
+    createdAt: new Date()
+  });
+};
+
+export const getCategories = async (walletId) => {
+  if (!walletId) return [];
   const q = query(
     collection(db, "categories"), 
-    where("userId", "==", userId)
+    where("walletId", "==", walletId)
   );
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -34,18 +64,19 @@ export const deleteCategory = async (id) => {
 };
 
 // --- People ---
-export const addPerson = async (userId, name) => {
+export const addPerson = async (walletId, name) => {
   return await addDoc(collection(db, "people"), {
     name,
-    userId,
+    walletId,
     createdAt: new Date()
   });
 };
 
-export const getPeople = async (userId) => {
+export const getPeople = async (walletId) => {
+  if (!walletId) return [];
   const q = query(
     collection(db, "people"), 
-    where("userId", "==", userId)
+    where("walletId", "==", walletId)
   );
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -56,18 +87,19 @@ export const deletePerson = async (id) => {
 };
 
 // --- Expenses ---
-export const addExpense = async (userId, expenseData) => {
+export const addExpense = async (walletId, expenseData) => {
   return await addDoc(collection(db, "expenses"), {
     ...expenseData,
-    userId,
+    walletId,
     createdAt: new Date()
   });
 };
 
-export const getExpenses = async (userId) => {
+export const getExpenses = async (walletId) => {
+  if (!walletId) return [];
   const q = query(
     collection(db, "expenses"), 
-    where("userId", "==", userId),
+    where("walletId", "==", walletId),
     orderBy("createdAt", "desc")
   );
   const snapshot = await getDocs(q);

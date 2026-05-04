@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { addExpense, getCategories, getPeople } from "@/services/db";
 import { useAuth } from "@/context/AuthContext";
+import { useWallet } from "@/context/WalletContext";
 
 export default function ExpenseForm({ onExpenseAdded }) {
   const { user } = useAuth();
+  const { activeWallet } = useWallet();
   const [product, setProduct] = useState("");
   const [value, setValue] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -16,25 +18,25 @@ export default function ExpenseForm({ onExpenseAdded }) {
   const [people, setPeople] = useState([]);
 
   useEffect(() => {
-    if (user) {
+    if (activeWallet) {
       loadSelectData();
     }
-  }, [user]);
+  }, [activeWallet]);
 
   const loadSelectData = async () => {
-    const cats = await getCategories(user.uid);
-    const peps = await getPeople(user.uid);
+    const cats = await getCategories(activeWallet.id);
+    const peps = await getPeople(activeWallet.id);
     setCategories(cats);
     setPeople(peps);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!product || !value || !categoryId || !paidBy) return;
+    if (!product || !value || !categoryId || !paidBy || !activeWallet) return;
 
     setIsSubmitting(true);
     try {
-      await addExpense(user.uid, {
+      await addExpense(activeWallet.id, {
         product,
         value: Number(value),
         categoryId,

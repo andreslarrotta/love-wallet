@@ -1,16 +1,20 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
+import { useWallet } from "@/context/WalletContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseList from "@/components/ExpenseList";
 
 export default function Home() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
+  const { wallets, activeWallet, switchWallet, loading: walletLoading } = useWallet();
   const router = useRouter();
 
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const loading = authLoading || walletLoading;
 
   useEffect(() => {
     if (!loading && !user) {
@@ -38,6 +42,25 @@ export default function Home() {
           🚪
         </button>
       </header>
+
+      {/* Wallet Toggle */}
+      {wallets.length > 1 && (
+        <div className="flex bg-[#F2F2F2] p-1 rounded-pill mb-section-gap">
+          {wallets.map(wallet => (
+            <button
+              key={wallet.id}
+              onClick={() => switchWallet(wallet.id)}
+              className={`flex-1 py-2 text-sm font-bold rounded-pill transition-all ${
+                activeWallet?.id === wallet.id 
+                  ? "bg-white text-primary shadow-sm" 
+                  : "text-text-secondary"
+              }`}
+            >
+              {wallet.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       <section className="mb-section-gap">
         <ExpenseForm onExpenseAdded={() => setRefreshKey(k => k + 1)} />

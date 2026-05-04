@@ -1,0 +1,64 @@
+"use client";
+
+import { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthContext";
+import { getUserWallets, createPersonalWallet } from "@/services/db";
+
+const WalletContext = createContext({});
+
+export function WalletProvider({ children }) {
+  const { user, loading: authLoading } = useAuth();
+  const [wallets, setWallets] = useState([]);
+  const [activeWallet, setActiveWallet] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (user) {
+      loadWallets();
+    } else {
+      setWallets([]);
+      setActiveWallet(null);
+      setLoading(false);
+    }
+  }, [user, authLoading]);
+
+  const loadWallets = async () => {
+    setLoading(true);
+    let userWallets = await getUserWallets(user.email);
+    
+    // Auto-create personal wallet if it doesn't exist
+    if (userWallets.length === 0) {
+      await createPersonalWallet(user.email);
+      userWallets = await getUserWallets(user.email);
+    }
+
+    setWallets(userWallets);
+    
+    // Set active wallet to personal by default if not set
+    if (!activeWallet) {
+      const personalWallet = userWallets.find(w => w.type === "personal") || userWallets[0];
+      setActiveWallet(personalWallet);
+    } else {
+      // Ensure the active wallet still exists
+      const stillExists = userWallets.find(w => w.id === activeWallet.id);
+      if (!stillExists) setActiveWallet(userWallets[0]);
+    }
+
+    setLoading(false);
+  };
+
+  const switchWallet = (walletId) => {
+    const wallet = wallets.find(w => w.id === walletId);
+    if (wallet) setActiveWallet(wallet);
+  };
+
+  return (
+    <WalletContext.Provider value={{ wallets, activeWallet, switchWallet, loadWallets, loading: authLoading || loading }}>
+      {children}
+    </WalletContext.Provider>
+  );
+}
+
+export const useWallet = () => useContext(WalletContext);

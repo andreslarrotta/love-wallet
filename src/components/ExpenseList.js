@@ -3,26 +3,28 @@
 import { useState, useEffect } from "react";
 import { getExpenses, getCategories, getPeople } from "@/services/db";
 import { useAuth } from "@/context/AuthContext";
+import { useWallet } from "@/context/WalletContext";
 
 export default function ExpenseList({ refreshTrigger }) {
   const { user } = useAuth();
+  const { activeWallet } = useWallet();
   const [expenses, setExpenses] = useState([]);
   const [categories, setCategories] = useState({});
   const [people, setPeople] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
+    if (activeWallet) {
       loadData();
     }
-  }, [user, refreshTrigger]);
+  }, [activeWallet, refreshTrigger]);
 
   const loadData = async () => {
     setLoading(true);
     const [expData, catData, pepData] = await Promise.all([
-      getExpenses(user.uid),
-      getCategories(user.uid),
-      getPeople(user.uid)
+      getExpenses(activeWallet.id),
+      getCategories(activeWallet.id),
+      getPeople(activeWallet.id)
     ]);
 
     const catMap = {};
