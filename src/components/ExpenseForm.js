@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { addExpense, getCategories, getPeople } from "@/services/db";
+import { addExpense, getCategories } from "@/services/db";
 import { useAuth } from "@/context/AuthContext";
 import { useWallet } from "@/context/WalletContext";
 
@@ -15,7 +15,6 @@ export default function ExpenseForm({ onExpenseAdded }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [categories, setCategories] = useState([]);
-  const [people, setPeople] = useState([]);
 
   useEffect(() => {
     if (activeWallet) {
@@ -25,9 +24,7 @@ export default function ExpenseForm({ onExpenseAdded }) {
 
   const loadSelectData = async () => {
     const cats = await getCategories(activeWallet.id);
-    const peps = await getPeople(activeWallet.id);
     setCategories(cats);
-    setPeople(peps);
   };
 
   const handleSubmit = async (e) => {
@@ -108,8 +105,8 @@ export default function ExpenseForm({ onExpenseAdded }) {
               required
             >
               <option value="">Selecciona...</option>
-              {people.map(person => (
-                <option key={person.id} value={person.id}>{person.name}</option>
+              {activeWallet?.members.map(member => (
+                <option key={member} value={member}>{member}</option>
               ))}
             </select>
           </div>

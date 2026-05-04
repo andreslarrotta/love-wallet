@@ -26,8 +26,8 @@ export default function BudgetSummary({ refreshTrigger }) {
     const spentByCategoryAndUser = {};
     expData.forEach(expense => {
       const catId = expense.categoryId;
-      // If the expense doesn't have a userEmail (old data), fallback to the first member
-      const email = expense.userEmail || activeWallet.members[0];
+      // Fallback to userEmail or first member for backward compatibility with old data
+      const email = expense.paidBy || expense.userEmail || activeWallet.members[0];
       
       if (!spentByCategoryAndUser[catId]) spentByCategoryAndUser[catId] = {};
       if (!spentByCategoryAndUser[catId][email]) spentByCategoryAndUser[catId][email] = 0;

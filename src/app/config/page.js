@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useWallet } from "@/context/WalletContext";
 import { useRouter } from "next/navigation";
-import { addCategory, getCategories, deleteCategory, updateCategory, addPerson, getPeople, deletePerson, createSharedWallet } from "@/services/db";
+import { addCategory, getCategories, deleteCategory, updateCategory, createSharedWallet } from "@/services/db";
 import Link from "next/link";
 
 export default function ConfigPage() {
@@ -13,14 +13,12 @@ export default function ConfigPage() {
   const router = useRouter();
 
   const [categories, setCategories] = useState([]);
-  const [people, setPeople] = useState([]);
   
   const [newCatName, setNewCatName] = useState("");
   // budgets is now an object mapping email -> amount
   const [newCatBudgets, setNewCatBudgets] = useState({});
   const [editingCategoryId, setEditingCategoryId] = useState(null);
 
-  const [newPersonName, setNewPersonName] = useState("");
   const [partnerEmail, setPartnerEmail] = useState("");
 
   const loading = authLoading || walletLoading;
@@ -42,9 +40,7 @@ export default function ConfigPage() {
   const loadData = async () => {
     if (!activeWallet) return;
     const cats = await getCategories(activeWallet.id);
-    const peps = await getPeople(activeWallet.id);
     setCategories(cats);
-    setPeople(peps);
   };
 
   const handleBudgetChange = (email, value) => {
@@ -95,13 +91,7 @@ export default function ConfigPage() {
     setNewCatBudgets(resetBudgets);
   };
 
-  const handleAddPerson = async (e) => {
-    e.preventDefault();
-    if (!newPersonName || !activeWallet) return;
-    await addPerson(activeWallet.id, newPersonName);
-    setNewPersonName("");
-    loadData();
-  };
+
 
   const handleCreateSharedWallet = async (e) => {
     e.preventDefault();
@@ -117,10 +107,7 @@ export default function ConfigPage() {
     loadData();
   };
 
-  const handleDeletePerson = async (id) => {
-    await deletePerson(id);
-    loadData();
-  };
+
 
   if (loading || !user) return <div className="min-h-screen bg-background flex justify-center items-center">Cargando...</div>;
 
@@ -258,34 +245,7 @@ export default function ConfigPage() {
         </div>
       </section>
 
-      {/* People Section */}
-      <section>
-        <h2 className="section-title mb-4">Personas (Quién paga)</h2>
-        
-        <form onSubmit={handleAddPerson} className="flex gap-2 mb-4">
-          <input 
-            type="text" 
-            placeholder="Nombre de la persona" 
-            value={newPersonName}
-            onChange={(e) => setNewPersonName(e.target.value)}
-            className="flex-1 h-12 bg-[#F2F2F2] rounded-search-bar px-4 text-sm"
-            required
-          />
-          <button type="submit" className="w-12 h-12 bg-primary text-text-primary font-bold rounded-search-bar flex items-center justify-center shadow-sm text-xl">
-            +
-          </button>
-        </form>
 
-        <div className="space-y-2">
-          {people.map(person => (
-            <div key={person.id} className="flex justify-between items-center p-card-p bg-surface rounded-card shadow-sm">
-              <p className="card-title">{person.name}</p>
-              <button onClick={() => handleDeletePerson(person.id)} className="text-red-500 text-sm">Eliminar</button>
-            </div>
-          ))}
-          {people.length === 0 && <p className="text-sm text-text-secondary text-center py-4">No hay personas registradas.</p>}
-        </div>
-      </section>
     </div>
   );
 }
