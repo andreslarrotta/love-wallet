@@ -109,3 +109,7 @@ export const getExpenses = async (walletId) => {
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
+
+export const deleteExpense = async (id) => {
+  return await deleteDoc(doc(db, "expenses", id));
+};

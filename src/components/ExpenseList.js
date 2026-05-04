@@ -1,75 +1,105 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getExpenses, getCategories, getPeople } from "@/services/db";
-import { useAuth } from "@/context/AuthContext";
+import { getExpenses, getCategories, deleteExpense } from "@/services/db";
 import { useWallet } from "@/context/WalletContext";
 
-export default function ExpenseList({ refreshTrigger }) {
-  const { user } = useAuth();
+export default function ExpenseList({ refreshTrigger, selectedMonth }) {
   const { activeWallet } = useWallet();
   const [expenses, setExpenses] = useState([]);
   const [categories, setCategories] = useState({});
-  const [people, setPeople] = useState({});
   const [loading, setLoading] = useState(true);
+
+  // Local state to force reload after delete
+  const [localRefresh, setLocalRefresh] = useState(0);
 
   useEffect(() => {
     if (activeWallet) {
       loadData();
     }
-  }, [activeWallet, refreshTrigger]);
+  }, [activeWallet, refreshTrigger, localRefresh, selectedMonth]);
 
   const loadData = async () => {
     setLoading(true);
-    const [expData, catData, pepData] = await Promise.all([
+    const [expData, catData] = await Promise.all([
       getExpenses(activeWallet.id),
-      getCategories(activeWallet.id),
-      getPeople(activeWallet.id)
+      getCategories(activeWallet.id)
     ]);
 
     const catMap = {};
     catData.forEach(cat => catMap[cat.id] = cat);
     setCategories(catMap);
 
-    const pepMap = {};
-    pepData.forEach(pep => pepMap[pep.id] = pep);
-    setPeople(pepMap);
+    const filteredExpenses = selectedMonth 
+      ? expData.filter(expense => {
+          if (!expense.createdAt) return true;
+          const date = expense.createdAt.toDate ? expense.createdAt.toDate() : new Date(expense.createdAt);
+          const expMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          return expMonth === selectedMonth;
+        })
+      : expData;
 
-    setExpenses(expData);
+    setExpenses(filteredExpenses);
     setLoading(false);
   };
 
-  if (loading) return <div className="text-center py-4 text-text-secondary">Cargando gastos...</div>;
+  const handleDelete = async (id) => {
+    if (confirm("¿Estás seguro de que deseas eliminar este gasto?")) {
+      await deleteExpense(id);
+      setLocalRefresh(prev => prev + 1);
+    }
+  };
 
-  if (expenses.length === 0) {
-    return <div className="text-center py-8 text-text-secondary">No hay gastos registrados aún.</div>;
-  }
+  const totalSpent = expenses.reduce((acc, exp) => acc + exp.value, 0);
+
+  if (loading) return <div className="text-center py-4 text-text-secondary text-sm">Cargando gastos...</div>;
 
   return (
-    <div className="space-y-3">
-      {expenses.map(expense => (
-        <div key={expense.id} className="bg-surface p-4 rounded-card shadow-sm flex justify-between items-center border border-border">
-          <div>
-            <p className="font-bold text-text-primary">{expense.product}</p>
-            <div className="flex gap-2 text-xs text-text-secondary mt-1">
-              <span className="bg-[#F2F2F2] px-2 py-0.5 rounded-pill">
-                {categories[expense.categoryId]?.name || "Sin categoría"}
-              </span>
-              <span className="bg-[#F2F2F2] px-2 py-0.5 rounded-pill">
-                🧑 {people[expense.paidBy]?.name || "Desconocido"}
-              </span>
+    <div className="space-y-4">
+      {/* Total Section */}
+      <div className="bg-primary/10 p-4 rounded-card border border-primary/20 flex justify-between items-center">
+        <span className="text-sm font-bold text-primary uppercase">Total del mes</span>
+        <span className="text-xl font-extrabold text-primary">${totalSpent.toLocaleString()}</span>
+      </div>
+
+      {expenses.length === 0 ? (
+        <div className="text-center py-8 text-text-secondary text-sm">No hay gastos registrados en este mes.</div>
+      ) : (
+        <div className="space-y-3">
+          {expenses.map(expense => (
+            <div key={expense.id} className="bg-surface p-4 rounded-card shadow-sm flex justify-between items-center border border-border">
+              <div className="flex-1 mr-2">
+                <p className="font-bold text-text-primary text-sm truncate">{expense.product}</p>
+                <div className="flex gap-2 text-[10px] text-text-secondary mt-1">
+                  <span className="bg-[#F2F2F2] px-2 py-0.5 rounded-pill truncate max-w-[100px]">
+                    {categories[expense.categoryId]?.name || "Sin categoría"}
+                  </span>
+                  <span className="bg-[#F2F2F2] px-2 py-0.5 rounded-pill truncate max-w-[120px]" title={expense.paidBy}>
+                    🧑 {expense.paidBy?.split('@')[0] || "Desconocido"}
+                  </span>
+                </div>
+              </div>
+              <div className="text-right flex items-center gap-3">
+                <div>
+                  <p className="font-extrabold text-base text-primary">
+                    ${expense.value.toLocaleString()}
+                  </p>
+                  <p className="text-[10px] text-text-tertiary">
+                    {expense.createdAt?.toDate().toLocaleDateString()}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => handleDelete(expense.id)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-red-100 text-red-500 hover:bg-red-200 transition-colors"
+                  title="Eliminar gasto"
+                >
+                  🗑️
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="text-right">
-            <p className="font-extrabold text-lg text-primary">
-              ${expense.value.toLocaleString()}
-            </p>
-            <p className="text-[10px] text-text-tertiary">
-              {expense.createdAt?.toDate().toLocaleDateString()}
-            </p>
-          </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }

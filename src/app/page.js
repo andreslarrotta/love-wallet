@@ -15,6 +15,12 @@ export default function Home() {
   const router = useRouter();
 
   const [refreshKey, setRefreshKey] = useState(0);
+  
+  // Default to current month YYYY-MM
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  });
 
   const loading = authLoading || walletLoading;
 
@@ -65,8 +71,16 @@ export default function Home() {
       )}
 
       <section className="mb-section-gap">
-        <h2 className="section-title mb-4">Presupuesto</h2>
-        <BudgetSummary refreshTrigger={refreshKey} />
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="section-title">Presupuesto</h2>
+          <input 
+            type="month" 
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="text-xs bg-[#F2F2F2] rounded-pill px-2 py-1 outline-none text-text-secondary font-bold"
+          />
+        </div>
+        <BudgetSummary refreshTrigger={refreshKey} selectedMonth={selectedMonth} />
       </section>
 
       <section className="mb-section-gap">
@@ -80,7 +94,7 @@ export default function Home() {
             ⚙️ Configurar
           </Link>
         </div>
-        <ExpenseList refreshTrigger={refreshKey} />
+        <ExpenseList refreshTrigger={refreshKey} selectedMonth={selectedMonth} />
       </section>
 
       {/* Bottom Nav Mockup */}

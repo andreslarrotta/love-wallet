@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { getExpenses, getCategories } from "@/services/db";
 import { useWallet } from "@/context/WalletContext";
 
-export default function BudgetSummary({ refreshTrigger }) {
+export default function BudgetSummary({ refreshTrigger, selectedMonth }) {
   const { activeWallet } = useWallet();
   const [budgetData, setBudgetData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +13,7 @@ export default function BudgetSummary({ refreshTrigger }) {
     if (activeWallet) {
       calculateBudgets();
     }
-  }, [activeWallet, refreshTrigger]);
+  }, [activeWallet, refreshTrigger, selectedMonth]);
 
   const calculateBudgets = async () => {
     setLoading(true);
@@ -22,9 +22,18 @@ export default function BudgetSummary({ refreshTrigger }) {
       getCategories(activeWallet.id)
     ]);
 
+    const filteredExpenses = selectedMonth 
+      ? expData.filter(expense => {
+          if (!expense.createdAt) return true;
+          const date = expense.createdAt.toDate ? expense.createdAt.toDate() : new Date(expense.createdAt);
+          const expMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          return expMonth === selectedMonth;
+        })
+      : expData;
+
     // Aggregate expenses by category AND by userEmail
     const spentByCategoryAndUser = {};
-    expData.forEach(expense => {
+    filteredExpenses.forEach(expense => {
       const catId = expense.categoryId;
       // Fallback to userEmail or first member for backward compatibility with old data
       const email = expense.paidBy || expense.userEmail || activeWallet.members[0];
