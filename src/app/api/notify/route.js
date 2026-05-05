@@ -24,16 +24,17 @@ export async function POST(request) {
     }
 
     // 2. Get tokens for members
-    const tokens = [];
+    let tokens = [];
     for (const email of membersToNotify) {
       const userSnapshot = await adminDb.collection("users").where("email", "==", email).get();
       if (!userSnapshot.empty) {
         const userData = userSnapshot.docs[0].data();
-        if (userData.fcmToken) {
-          tokens.push(userData.fcmToken);
+        if (userData.fcmTokens && Array.isArray(userData.fcmTokens)) {
+          tokens = [...tokens, ...userData.fcmTokens];
         }
       }
     }
+
 
     if (tokens.length === 0) {
       return NextResponse.json({ success: true, message: "No tokens found" });

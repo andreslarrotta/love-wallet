@@ -9,8 +9,10 @@ import {
   where, 
   getDocs,
   orderBy,
-  getDoc
+  getDoc,
+  arrayUnion
 } from "firebase/firestore";
+
 
 // --- Wallets ---
 export const createPersonalWallet = async (userEmail) => {
@@ -123,15 +125,16 @@ export const saveFcmToken = async (userEmail, token) => {
   if (snapshot.empty) {
     await addDoc(collection(db, "users"), {
       email: userEmail,
-      fcmToken: token,
+      fcmTokens: [token],
       updatedAt: new Date()
     });
   } else {
     const userDoc = snapshot.docs[0];
     await updateDoc(doc(db, "users", userDoc.id), {
-      fcmToken: token,
+      fcmTokens: arrayUnion(token),
       updatedAt: new Date()
     });
   }
 };
+
 
