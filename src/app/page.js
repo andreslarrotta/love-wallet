@@ -15,6 +15,33 @@ export default function Home() {
   const router = useRouter();
 
   const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker registered'))
+        .catch(err => console.error('SW registration failed', err));
+    }
+    // Request Notification permission
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+  }, []);
+
+  const triggerExpenseNotification = () => {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg) {
+          reg.showNotification('Nuevo gasto agregado', {
+            body: 'Se ha añadido un nuevo gasto a la billetera compartida.',
+            icon: '/favicon.ico',
+          });
+        }
+      });
+    }
+  };
   
   // Default to current month YYYY-MM
   const [selectedMonth, setSelectedMonth] = useState(() => {
@@ -84,7 +111,7 @@ export default function Home() {
       </section>
 
       <section className="mb-section-gap">
-        <ExpenseForm onExpenseAdded={() => setRefreshKey(k => k + 1)} />
+        <ExpenseForm onExpenseAdded={() => { setRefreshKey(k => k + 1); triggerExpenseNotification(); }} />
       </section>
 
       <section>
