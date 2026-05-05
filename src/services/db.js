@@ -113,3 +113,25 @@ export const getExpenses = async (walletId) => {
 export const deleteExpense = async (id) => {
   return await deleteDoc(doc(db, "expenses", id));
 };
+
+// --- Notifications & Tokens ---
+export const saveFcmToken = async (userEmail, token) => {
+  if (!userEmail || !token) return;
+  const q = query(collection(db, "users"), where("email", "==", userEmail));
+  const snapshot = await getDocs(q);
+  
+  if (snapshot.empty) {
+    await addDoc(collection(db, "users"), {
+      email: userEmail,
+      fcmToken: token,
+      updatedAt: new Date()
+    });
+  } else {
+    const userDoc = snapshot.docs[0];
+    await updateDoc(doc(db, "users", userDoc.id), {
+      fcmToken: token,
+      updatedAt: new Date()
+    });
+  }
+};
+

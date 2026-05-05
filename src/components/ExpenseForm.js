@@ -40,7 +40,22 @@ export default function ExpenseForm({ onExpenseAdded }) {
         paidBy,
         userEmail: user.email
       });
+
+      // Send notification to other members
+      fetch("/api/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          walletId: activeWallet.id,
+          amount: value,
+          product: product,
+          userName: user.displayName || user.email,
+          excludeEmail: user.email
+        })
+      }).catch(err => console.error("Notification error:", err));
+
       setProduct("");
+
       setValue("");
       setCategoryId("");
       setPaidBy("");

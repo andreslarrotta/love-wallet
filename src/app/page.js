@@ -8,6 +8,7 @@ import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseList from "@/components/ExpenseList";
 import BudgetSummary from "@/components/BudgetSummary";
 import Link from "next/link";
+import { messaging } from "@/lib/firebase";
 
 export default function Home() {
   const { user, loading: authLoading, logout } = useAuth();
@@ -18,29 +19,44 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
-        .then(() => console.log('Service Worker registered'))
-        .catch(err => console.error('SW registration failed', err));
+      const registerSW = async () => {
+        try {
+          const registration = await navigator.serviceWorker.register('/sw.js');
+          console.log('Service Worker registered');
+
+          // Get FCM Token
+          if (user?.email && messaging) {
+            const { getToken } = await import("firebase/messaging");
+            const currentToken = await getToken(messaging, {
+              serviceWorkerRegistration: registration,
+              vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY // Make sure this is in your .env
+            });
+
+            if (currentToken) {
+              const { saveFcmToken } = await import("@/services/db");
+              await saveFcmToken(user.email, currentToken);
+              console.log("FCM Token saved");
+            }
+          }
+        } catch (err) {
+          console.error('SW registration or FCM token failed', err);
+        }
+      };
+
+      registerSW();
     }
+    
     // Request Notification permission
     if (typeof window !== 'undefined' && 'Notification' in window) {
       if (Notification.permission === 'default') {
         Notification.requestPermission();
       }
     }
-  }, []);
+  }, [user]);
 
   const triggerExpenseNotification = () => {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      navigator.serviceWorker.getRegistration().then(reg => {
-        if (reg) {
-          reg.showNotification('Nuevo gasto agregado', {
-            body: 'Se ha añadido un nuevo gasto a la billetera compartida.',
-            icon: '/favicon.ico',
-          });
-        }
-      });
-    }
+    // This is now handled by the backend broadcast, but we can keep it for local testing if needed
+    // or remove it to avoid duplicate notifications for the sender.
   };
   
   // Default to current month YYYY-MM
