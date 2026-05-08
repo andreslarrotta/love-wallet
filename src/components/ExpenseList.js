@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { getExpenses, getCategories, deleteExpense } from "@/services/db";
 import { useWallet } from "@/context/WalletContext";
 
-export default function ExpenseList({ refreshTrigger, selectedMonth }) {
+export default function ExpenseList({ refreshTrigger, selectedMonth, showValues = true }) {
   const { activeWallet } = useWallet();
   const [expenses, setExpenses] = useState([]);
   const [categories, setCategories] = useState({});
@@ -52,6 +52,11 @@ export default function ExpenseList({ refreshTrigger, selectedMonth }) {
 
   const totalSpent = expenses.reduce((acc, exp) => acc + exp.value, 0);
 
+  const formatCurrency = (value) => {
+    if (!showValues) return "******";
+    return `$${value.toLocaleString()}`;
+  };
+
   if (loading) return <div className="text-center py-4 text-text-secondary text-sm">Cargando gastos...</div>;
 
   return (
@@ -59,7 +64,7 @@ export default function ExpenseList({ refreshTrigger, selectedMonth }) {
       {/* Total Section */}
       <div className="bg-primary/10 p-4 rounded-card border border-primary/20 flex justify-between items-center">
         <span className="text-sm font-bold text-primary uppercase">Total del mes</span>
-        <span className="text-xl font-extrabold text-primary">${totalSpent.toLocaleString()}</span>
+        <span className="text-xl font-extrabold text-primary">{formatCurrency(totalSpent)}</span>
       </div>
 
       {expenses.length === 0 ? (
@@ -82,7 +87,7 @@ export default function ExpenseList({ refreshTrigger, selectedMonth }) {
               <div className="text-right flex items-center gap-3">
                 <div>
                   <p className="font-extrabold text-base text-primary">
-                    ${expense.value.toLocaleString()}
+                    {formatCurrency(expense.value)}
                   </p>
                   <p className="text-[10px] text-text-tertiary">
                     {expense.createdAt?.toDate().toLocaleDateString()}

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { getExpenses, getCategories } from "@/services/db";
 import { useWallet } from "@/context/WalletContext";
 
-export default function BudgetSummary({ refreshTrigger, selectedMonth }) {
+export default function BudgetSummary({ refreshTrigger, selectedMonth, showValues = true }) {
   const { activeWallet } = useWallet();
   const [budgetData, setBudgetData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,6 +77,11 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth }) {
     setLoading(false);
   };
 
+  const formatCurrency = (value) => {
+    if (!showValues) return "******";
+    return `$${value.toLocaleString()}`;
+  };
+
   if (loading) return <div className="text-center py-4 text-text-secondary text-sm">Calculando presupuesto...</div>;
 
   if (budgetData.length === 0) {
@@ -102,7 +107,7 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth }) {
                     )}
                   </span>
                   <span className="text-xs text-text-secondary font-medium">
-                    ${data.spent.toLocaleString()} / ${data.budget.toLocaleString()}
+                    {formatCurrency(data.spent)} / {formatCurrency(data.budget)}
                   </span>
                 </div>
                 
@@ -116,8 +121,8 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth }) {
                 {data.budget > 0 && (
                   <p className={`text-[10px] text-right mt-1 ${data.isOver ? 'text-red-500 font-bold' : 'text-text-tertiary'}`}>
                     {data.isOver 
-                      ? `Excedido por $${Math.abs(data.remaining).toLocaleString()}` 
-                      : `Disponible: $${data.remaining.toLocaleString()}`
+                      ? `Excedido por ${formatCurrency(Math.abs(data.remaining))}` 
+                      : `Disponible: ${formatCurrency(data.remaining)}`
                     }
                   </p>
                 )}

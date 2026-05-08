@@ -16,6 +16,7 @@ export default function Home() {
   const router = useRouter();
 
   const [refreshKey, setRefreshKey] = useState(0);
+  const [showValues, setShowValues] = useState(true);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
@@ -116,14 +117,23 @@ export default function Home() {
       <section className="mb-section-gap">
         <div className="flex justify-between items-center mb-4">
           <h2 className="section-title">Presupuesto</h2>
-          <input 
-            type="month" 
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="text-xs bg-[#F2F2F2] rounded-pill px-2 py-1 outline-none text-text-secondary font-bold"
-          />
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setShowValues(!showValues)}
+              className="w-8 h-8 flex items-center justify-center bg-[#F2F2F2] rounded-pill text-sm hover:bg-[#E8E8E8] transition-colors"
+              title={showValues ? "Ocultar valores" : "Mostrar valores"}
+            >
+              {showValues ? "👁️" : "🙈"}
+            </button>
+            <input 
+              type="month" 
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="text-xs bg-[#F2F2F2] rounded-pill px-2 py-1 outline-none text-text-secondary font-bold h-8"
+            />
+          </div>
         </div>
-        <BudgetSummary refreshTrigger={refreshKey} selectedMonth={selectedMonth} />
+        <BudgetSummary refreshTrigger={refreshKey} selectedMonth={selectedMonth} showValues={showValues} />
       </section>
 
       <section className="mb-section-gap">
@@ -137,7 +147,7 @@ export default function Home() {
             ⚙️ Configurar
           </Link>
         </div>
-        <ExpenseList refreshTrigger={refreshKey} selectedMonth={selectedMonth} />
+        <ExpenseList refreshTrigger={refreshKey} selectedMonth={selectedMonth} showValues={showValues} />
       </section>
 
       {/* Bottom Nav Mockup */}
