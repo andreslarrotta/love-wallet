@@ -36,7 +36,6 @@ export function WalletProvider({ children }) {
         // Auto-create personal wallet if it doesn't exist
         if (userWallets.length === 0) {
           await createPersonalWallet(user.email);
-          return;
         }
 
         // Deduplicate and set wallets
