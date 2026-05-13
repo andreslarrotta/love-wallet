@@ -5,7 +5,7 @@ import { addExpense, getCategories, getExpenses } from "@/services/db";
 import { useAuth } from "@/context/AuthContext";
 import { useWallet } from "@/context/WalletContext";
 
-export default function ExpenseForm({ onExpenseAdded, selectedMonth }) {
+export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) {
   const { user } = useAuth();
   const { activeWallet } = useWallet();
   const [product, setProduct] = useState("");
@@ -81,6 +81,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth }) {
       setPaidBy("");
       await loadSelectData();
       if (onExpenseAdded) onExpenseAdded();
+      if (onClose) onClose();
     } catch (error) {
       console.error("Error adding expense:", error);
     } finally {
@@ -186,13 +187,24 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth }) {
           })()
         )}
 
-        <button 
-          type="submit" 
-          disabled={isSubmitting}
-          className="w-full h-12 bg-primary text-text-primary font-bold rounded-pill shadow-fab mt-2 disabled:opacity-50"
-        >
-          {isSubmitting ? "Guardando..." : "Guardar Gasto"}
-        </button>
+        <div className="flex gap-3 mt-2">
+          {onClose && (
+            <button 
+              type="button"
+              onClick={onClose}
+              className="flex-1 h-12 bg-[#F2F2F2] text-text-secondary font-bold rounded-pill"
+            >
+              Cancelar
+            </button>
+          )}
+          <button 
+            type="submit" 
+            disabled={isSubmitting}
+            className={`flex-[2] h-12 bg-primary text-text-primary font-bold rounded-pill shadow-fab disabled:opacity-50`}
+          >
+            {isSubmitting ? "Guardando..." : "Guardar Gasto"}
+          </button>
+        </div>
       </form>
     </div>
   );

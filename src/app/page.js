@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseList from "@/components/ExpenseList";
 import BudgetSummary from "@/components/BudgetSummary";
+import Modal from "@/components/Modal";
 import Link from "next/link";
 import { messaging } from "@/lib/firebase";
 
@@ -17,6 +18,7 @@ export default function Home() {
 
   const [refreshKey, setRefreshKey] = useState(0);
   const [showValues, setShowValues] = useState(true);
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
@@ -136,10 +138,6 @@ export default function Home() {
         <BudgetSummary refreshTrigger={refreshKey} selectedMonth={selectedMonth} showValues={showValues} />
       </section>
 
-      <section className="mb-section-gap">
-        <ExpenseForm selectedMonth={selectedMonth} onExpenseAdded={() => { setRefreshKey(k => k + 1); triggerExpenseNotification(); }} />
-      </section>
-
       <section>
         <div className="flex justify-between items-center mb-item-gap">
           <h2 className="section-title">Últimos Gastos</h2>
@@ -149,6 +147,32 @@ export default function Home() {
         </div>
         <ExpenseList refreshTrigger={refreshKey} selectedMonth={selectedMonth} showValues={showValues} />
       </section>
+
+      {/* Floating Action Button */}
+      <button 
+        onClick={() => setIsExpenseModalOpen(true)}
+        className="fixed bottom-[88px] right-6 h-14 pl-4 pr-6 bg-primary text-text-primary font-bold rounded-pill shadow-fab flex items-center gap-2 z-40 animate-in slide-in-from-right-full duration-500"
+      >
+        <span className="text-2xl">+</span>
+        <span className="text-sm">Nuevo Gasto</span>
+      </button>
+
+      {/* Expense Modal */}
+      <Modal 
+        isOpen={isExpenseModalOpen} 
+        onClose={() => setIsExpenseModalOpen(false)}
+        title="Agregar Nuevo Gasto"
+      >
+        <ExpenseForm 
+          selectedMonth={selectedMonth} 
+          onExpenseAdded={() => { 
+            setRefreshKey(k => k + 1); 
+            triggerExpenseNotification(); 
+            setIsExpenseModalOpen(false);
+          }} 
+          onClose={() => setIsExpenseModalOpen(false)}
+        />
+      </Modal>
 
       {/* Bottom Nav Mockup */}
       <nav className="fixed bottom-0 left-0 right-0 h-[72px] bg-white border-t border-divider flex items-center justify-around px-4 shadow-nav-bar">
