@@ -30,42 +30,54 @@ export function WalletProvider({ children }) {
     );
 
     const unsubscribe = onSnapshot(q, async (snapshot) => {
-      let userWallets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      
-      // Auto-create personal wallet if it doesn't exist
-      if (userWallets.length === 0) {
-        await createPersonalWallet(user.email);
-        // The snapshot will trigger again after creation
-        return;
-      }
+      try {
+        let userWallets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // Auto-create personal wallet if it doesn't exist
+        if (userWallets.length === 0) {
+          await createPersonalWallet(user.email);
+          return;
+        }
 
-      // Deduplicate and set wallets
-      const uniqueWallets = [];
-      const seenPersonal = new Set();
-      for (const w of userWallets) {
-        if (w.type === "personal") {
-          if (!seenPersonal.has(w.members[0])) {
+        // Deduplicate and set wallets
+        const uniqueWallets = [];
+        const seenPersonal = new Set();
+        for (const w of userWallets) {
+          if (w.type === "personal") {
+            const owner = w.members[0];
+            if (!seenPersonal.has(owner)) {
+              uniqueWallets.push(w);
+              seenPersonal.add(owner);
+            }
+          } else {
             uniqueWallets.push(w);
-            seenPersonal.add(w.members[0]);
           }
-        } else {
-          uniqueWallets.push(w);
         }
+        
+        setWallets(uniqueWallets);
+
+        // Manage active wallet - only update if actually different
+        setActiveWallet(current => {
+          if (!current) {
+            return uniqueWallets.find(w => w.type === "personal") || uniqueWallets[0];
+          }
+          const updated = uniqueWallets.find(w => w.id === current.id);
+          
+          if (!updated) return uniqueWallets[0] || null;
+          
+          // Simple check to avoid redundant updates if nothing changed
+          if (JSON.stringify(updated) === JSON.stringify(current)) {
+            return current;
+          }
+          return updated;
+        });
+      } catch (error) {
+        console.error("Error in wallet listener:", error);
+      } finally {
+        setLoading(false);
       }
-      setWallets(uniqueWallets);
-
-      // Manage active wallet
-      setActiveWallet(current => {
-        if (!current) {
-          return uniqueWallets.find(w => w.type === "personal") || uniqueWallets[0];
-        }
-        const updated = uniqueWallets.find(w => w.id === current.id);
-        return updated || uniqueWallets[0] || null;
-      });
-
-      setLoading(false);
     }, (error) => {
-      console.error("Wallet listener error:", error);
+      console.error("Wallet listener connection error:", error);
       setLoading(false);
     });
 
