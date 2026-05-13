@@ -1,8 +1,9 @@
 "use client";
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { getUserWallets, createPersonalWallet } from "@/services/db";
+import { db } from "@/lib/firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 
 const WalletContext = createContext({});
 
@@ -12,31 +13,33 @@ export function WalletProvider({ children }) {
   const [activeWallet, setActiveWallet] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  function resetWalletState() {
-    setWallets([]);
-    setActiveWallet(null);
-    setLoading(false);
-  }
-
   useEffect(() => {
     if (authLoading) return;
-    if (user) loadWallets();
-    else resetWalletState();
-  }, [user, authLoading]);
+    if (!user) {
+      setWallets([]);
+      setActiveWallet(null);
+      setLoading(false);
+      return;
+    }
 
-  async function loadWallets() {
-    if (!user) return;
-    try {
-      setLoading(true);
-      let userWallets = await getUserWallets(user.email);
+    setLoading(true);
+
+    const q = query(
+      collection(db, "wallets"),
+      where("members", "array-contains", user.email)
+    );
+
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      let userWallets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       
       // Auto-create personal wallet if it doesn't exist
       if (userWallets.length === 0) {
         await createPersonalWallet(user.email);
-        userWallets = await getUserWallets(user.email);
+        // The snapshot will trigger again after creation
+        return;
       }
 
-      // Deduplicate personal wallets (React Strict Mode bug mitigation)
+      // Deduplicate and set wallets
       const uniqueWallets = [];
       const seenPersonal = new Set();
       for (const w of userWallets) {
@@ -49,25 +52,29 @@ export function WalletProvider({ children }) {
           uniqueWallets.push(w);
         }
       }
-
       setWallets(uniqueWallets);
-      
-      // Set active wallet to personal by default if not set
-      if (!activeWallet) {
-        const personalWallet = uniqueWallets.find(w => w.type === "personal") || uniqueWallets[0];
-        setActiveWallet(personalWallet);
-      } else {
-        // Ensure the active wallet still exists and refresh its data
-        const updated = uniqueWallets.find(w => w.id === activeWallet.id);
-        if (updated) setActiveWallet(updated);
-        else setActiveWallet(uniqueWallets[0] || null);
-      }
-    } catch (error) {
-      console.error("Error loading wallets:", error);
-    } finally {
+
+      // Manage active wallet
+      setActiveWallet(current => {
+        if (!current) {
+          return uniqueWallets.find(w => w.type === "personal") || uniqueWallets[0];
+        }
+        const updated = uniqueWallets.find(w => w.id === current.id);
+        return updated || uniqueWallets[0] || null;
+      });
+
       setLoading(false);
-    }
-  }
+    }, (error) => {
+      console.error("Wallet listener error:", error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [user, authLoading]);
+
+  const loadWallets = () => {
+    // This is now handled by the real-time listener, but we keep the name for compatibility
+  };
 
   const switchWallet = (walletId) => {
     const wallet = wallets.find(w => w.id === walletId);
