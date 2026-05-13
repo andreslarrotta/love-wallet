@@ -120,6 +120,12 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
     return `$${value.toLocaleString()}`;
   };
 
+  const getProgressColor = (percentage) => {
+    if (percentage <= 50) return "bg-green-500";
+    if (percentage <= 80) return "bg-orange-400";
+    return "bg-red-500";
+  };
+
   if (loading) return <div className="text-center py-4 text-text-secondary text-sm">Calculando presupuesto...</div>;
 
   if (budgetData.length === 0) {
@@ -154,7 +160,7 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
 
               <div className="w-full bg-[#F2F2F2] rounded-full h-2.5 overflow-hidden">
                 <div 
-                  className={`h-full rounded-full transition-all duration-500 ${data.isOver ? "bg-red-500" : "bg-primary"}`} 
+                  className={`h-full rounded-full transition-all duration-500 ${getProgressColor(data.percentage)}`} 
                   style={{ width: `${data.percentage}%` }}
                 ></div>
               </div>
@@ -201,7 +207,7 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
                   
                   <div className="w-full bg-[#E8E8E8] rounded-full h-2 overflow-hidden">
                     <div 
-                      className={`h-2 rounded-full ${data.isOver ? "bg-red-500" : data.isLow ? "bg-orange-400" : "bg-primary"}`} 
+                      className={`h-2 rounded-full transition-all duration-500 ${getProgressColor(data.percentage)}`} 
                       style={{ width: `${data.percentage}%` }}
                     ></div>
                   </div>
@@ -256,7 +262,7 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
 
                     <div className="w-full bg-[#E8E8E8] rounded-full h-2 overflow-hidden">
                       <div
-                        className={`h-2 rounded-full ${data.incomeIsOver ? "bg-red-500" : "bg-primary"}`}
+                        className={`h-2 rounded-full transition-all duration-500 ${getProgressColor(data.incomePercentage ?? 0)}`}
                         style={{ width: `${data.incomePercentage ?? 0}%` }}
                       ></div>
                     </div>
