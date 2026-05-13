@@ -20,55 +20,53 @@ export function WalletProvider({ children }) {
 
   useEffect(() => {
     if (authLoading) return;
-    let cancelled = false;
-    setTimeout(() => {
-      if (cancelled) return;
-      if (user) loadWallets();
-      else resetWalletState();
-    }, 0);
-    return () => {
-      cancelled = true;
-    };
+    if (user) loadWallets();
+    else resetWalletState();
   }, [user, authLoading]);
 
   async function loadWallets() {
-    setLoading(true);
-    let userWallets = await getUserWallets(user.email);
-    
-    // Auto-create personal wallet if it doesn't exist
-    if (userWallets.length === 0) {
-      await createPersonalWallet(user.email);
-      userWallets = await getUserWallets(user.email);
-    }
-
-    // Deduplicate personal wallets (React Strict Mode bug mitigation)
-    const uniqueWallets = [];
-    const seenPersonal = new Set();
-    for (const w of userWallets) {
-      if (w.type === "personal") {
-        if (!seenPersonal.has(w.members[0])) {
-          uniqueWallets.push(w);
-          seenPersonal.add(w.members[0]);
-        }
-      } else {
-        uniqueWallets.push(w);
+    if (!user) return;
+    try {
+      setLoading(true);
+      let userWallets = await getUserWallets(user.email);
+      
+      // Auto-create personal wallet if it doesn't exist
+      if (userWallets.length === 0) {
+        await createPersonalWallet(user.email);
+        userWallets = await getUserWallets(user.email);
       }
-    }
 
-    setWallets(uniqueWallets);
-    
-    // Set active wallet to personal by default if not set
-    if (!activeWallet) {
-      const personalWallet = uniqueWallets.find(w => w.type === "personal") || uniqueWallets[0];
-      setActiveWallet(personalWallet);
-    } else {
-      // Ensure the active wallet still exists and refresh its data
-      const updated = uniqueWallets.find(w => w.id === activeWallet.id);
-      if (updated) setActiveWallet(updated);
-      else setActiveWallet(uniqueWallets[0] || null);
-    }
+      // Deduplicate personal wallets (React Strict Mode bug mitigation)
+      const uniqueWallets = [];
+      const seenPersonal = new Set();
+      for (const w of userWallets) {
+        if (w.type === "personal") {
+          if (!seenPersonal.has(w.members[0])) {
+            uniqueWallets.push(w);
+            seenPersonal.add(w.members[0]);
+          }
+        } else {
+          uniqueWallets.push(w);
+        }
+      }
 
-    setLoading(false);
+      setWallets(uniqueWallets);
+      
+      // Set active wallet to personal by default if not set
+      if (!activeWallet) {
+        const personalWallet = uniqueWallets.find(w => w.type === "personal") || uniqueWallets[0];
+        setActiveWallet(personalWallet);
+      } else {
+        // Ensure the active wallet still exists and refresh its data
+        const updated = uniqueWallets.find(w => w.id === activeWallet.id);
+        if (updated) setActiveWallet(updated);
+        else setActiveWallet(uniqueWallets[0] || null);
+      }
+    } catch (error) {
+      console.error("Error loading wallets:", error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const switchWallet = (walletId) => {

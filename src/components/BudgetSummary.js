@@ -104,14 +104,9 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
 
   useEffect(() => {
     if (activeWallet) {
-      let cancelled = false;
-      setTimeout(() => {
-        if (cancelled) return;
-        calculateBudgets();
-      }, 0);
-      return () => {
-        cancelled = true;
-      };
+      calculateBudgets();
+    } else {
+      setLoading(false);
     }
   }, [activeWallet, refreshTrigger, selectedMonth]);
 
@@ -128,62 +123,68 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
 
   if (loading) return <div className="text-center py-4 text-text-secondary text-sm">Calculando presupuesto...</div>;
 
-  if (budgetData.length === 0) {
-    return <div className="text-center py-4 text-text-secondary text-sm">No hay categorías configuradas para presupuestos.</div>;
-  }
-
   return (
     <>
       {/* Total Salary Consumption Summary */}
-      <div className="bg-primary/5 p-card-p rounded-card border border-primary/20 mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h3 className="text-sm font-bold text-primary">Consumo Total de Salario</h3>
-            <p className="text-[10px] text-text-tertiary">Total gastado este mes frente al ingreso configurado.</p>
+      {totalSummary.length > 0 && (
+        <div className="bg-primary/5 p-card-p rounded-card border border-primary/20 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h3 className="text-sm font-bold text-primary">Consumo Total de Salario</h3>
+              <p className="text-[10px] text-text-tertiary">Total gastado este mes frente al ingreso configurado.</p>
+            </div>
+            <Link href="/config" className="text-[10px] font-bold text-primary uppercase tracking-wider bg-white px-2 py-1 rounded-pill shadow-sm">
+              Configurar
+            </Link>
           </div>
-          <Link href="/config" className="text-[10px] font-bold text-primary uppercase tracking-wider bg-white px-2 py-1 rounded-pill shadow-sm">
-            Configurar
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {totalSummary.map(data => (
+              <div key={`${data.email}-total`} className="bg-white p-3 rounded-xl shadow-sm border border-divider">
+                <div className="flex justify-between items-end mb-2">
+                  <span className="text-xs font-bold text-text-secondary truncate pr-2">
+                    {data.email.split("@")[0]}
+                  </span>
+                  <span className={`text-xs font-bold ${data.isOver ? "text-red-500" : "text-primary"}`}>
+                    {formatCurrency(data.spent)} / {formatCurrency(data.income)}
+                  </span>
+                </div>
+
+                <div className="w-full bg-[#F2F2F2] rounded-full h-2.5 overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-500 ${getProgressColor(data.percentage)}`} 
+                    style={{ width: `${data.percentage}%` }}
+                  ></div>
+                </div>
+
+                <div className="flex justify-between mt-2">
+                  <span className="text-[10px] font-medium text-text-tertiary">
+                    {Math.round(data.percentage)}% usado
+                  </span>
+                  {data.income > 0 && (
+                    <span className={`text-[10px] font-bold ${data.isOver ? "text-red-500" : "text-green-600"}`}>
+                      {data.isOver 
+                        ? `Excedido por ${formatCurrency(Math.abs(data.remaining))}` 
+                        : `Libre: ${formatCurrency(data.remaining)}`
+                      }
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {budgetData.length === 0 ? (
+        <div className="text-center py-8 bg-surface rounded-card shadow-sm border border-divider">
+          <p className="text-text-secondary text-sm mb-4">No hay categorías configuradas para presupuestos.</p>
+          <Link href="/config" className="text-primary font-bold text-sm">
+            + Configurar Presupuesto
           </Link>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {totalSummary.map(data => (
-            <div key={`${data.email}-total`} className="bg-white p-3 rounded-xl shadow-sm border border-divider">
-              <div className="flex justify-between items-end mb-2">
-                <span className="text-xs font-bold text-text-secondary truncate pr-2">
-                  {data.email.split("@")[0]}
-                </span>
-                <span className={`text-xs font-bold ${data.isOver ? "text-red-500" : "text-primary"}`}>
-                  {formatCurrency(data.spent)} / {formatCurrency(data.income)}
-                </span>
-              </div>
-
-              <div className="w-full bg-[#F2F2F2] rounded-full h-2.5 overflow-hidden">
-                <div 
-                  className={`h-full rounded-full transition-all duration-500 ${getProgressColor(data.percentage)}`} 
-                  style={{ width: `${data.percentage}%` }}
-                ></div>
-              </div>
-
-              <div className="flex justify-between mt-2">
-                <span className="text-[10px] font-medium text-text-tertiary">
-                  {Math.round(data.percentage)}% usado
-                </span>
-                {data.income > 0 && (
-                  <span className={`text-[10px] font-bold ${data.isOver ? "text-red-500" : "text-green-600"}`}>
-                    {data.isOver 
-                      ? `Excedido por ${formatCurrency(Math.abs(data.remaining))}` 
-                      : `Libre: ${formatCurrency(data.remaining)}`
-                    }
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-surface p-card-p rounded-card shadow-card space-y-6">
+      ) : (
+        <div className="bg-surface p-card-p rounded-card shadow-card space-y-6">
         {budgetData.map(cat => (
           <div key={cat.id} className="border-b border-divider pb-4 last:border-0 last:pb-0">
             <h3 className="font-bold text-text-primary text-lg mb-3">{cat.name}</h3>
@@ -226,6 +227,7 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
           </div>
         ))}
       </div>
+    )}
 
       <div className="bg-surface p-card-p rounded-card shadow-card mt-section-gap">
         <div className="flex justify-between items-center mb-4">

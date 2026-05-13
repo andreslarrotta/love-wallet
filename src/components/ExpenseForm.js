@@ -43,14 +43,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth }) {
 
   useEffect(() => {
     if (activeWallet) {
-      let cancelled = false;
-      setTimeout(() => {
-        if (cancelled) return;
-        loadSelectData();
-      }, 0);
-      return () => {
-        cancelled = true;
-      };
+      loadSelectData();
     }
   }, [activeWallet, selectedMonth]);
 

@@ -39,14 +39,9 @@ export default function ExpenseList({ refreshTrigger, selectedMonth, showValues 
 
   useEffect(() => {
     if (activeWallet) {
-      let cancelled = false;
-      setTimeout(() => {
-        if (cancelled) return;
-        loadData();
-      }, 0);
-      return () => {
-        cancelled = true;
-      };
+      loadData();
+    } else {
+      setLoading(false);
     }
   }, [activeWallet, refreshTrigger, localRefresh, selectedMonth]);
 
