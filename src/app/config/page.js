@@ -1,4 +1,5 @@
 "use client";
+import Loading from "@/components/Loading";
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -145,7 +146,7 @@ export default function ConfigPage() {
 
 
 
-  if (loading || !user) return <div className="min-h-screen bg-background flex justify-center items-center">Cargando...</div>;
+  if (loading || !user) return <Loading fullScreen />;
 
   return (
     <div className="min-h-screen bg-background p-screen-h pb-24 overflow-y-auto">

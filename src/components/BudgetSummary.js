@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getExpenses, getCategories } from "@/services/db";
 import { useWallet } from "@/context/WalletContext";
+import Loading from "@/components/Loading";
 import Link from "next/link";
 
 export default function BudgetSummary({ refreshTrigger, selectedMonth, showValues = true }) {
@@ -121,7 +122,7 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
     return "bg-red-500";
   };
 
-  if (loading) return <div className="text-center py-4 text-text-secondary text-sm">Calculando presupuesto...</div>;
+  if (loading) return <Loading />;
 
   return (
     <>

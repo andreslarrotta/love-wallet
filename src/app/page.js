@@ -8,6 +8,7 @@ import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseList from "@/components/ExpenseList";
 import BudgetSummary from "@/components/BudgetSummary";
 import Modal from "@/components/Modal";
+import Loading from "@/components/Loading";
 import Link from "next/link";
 import { messaging } from "@/lib/firebase";
 
@@ -77,7 +78,7 @@ export default function Home() {
   }, [user, loading, router]);
 
   if (loading || !user) {
-    return <div className="min-h-screen bg-background flex items-center justify-center">Cargando...</div>;
+    return <Loading fullScreen />;
   }
 
   return (

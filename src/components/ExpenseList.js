@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getExpenses, getCategories, deleteExpense } from "@/services/db";
 import { useWallet } from "@/context/WalletContext";
+import Loading from "@/components/Loading";
 
 export default function ExpenseList({ refreshTrigger, selectedMonth, showValues = true }) {
   const { activeWallet } = useWallet();
@@ -59,7 +60,7 @@ export default function ExpenseList({ refreshTrigger, selectedMonth, showValues 
     return `$${value.toLocaleString()}`;
   };
 
-  if (loading) return <div className="text-center py-4 text-text-secondary text-sm">Cargando gastos...</div>;
+  if (loading) return <Loading />;
 
   return (
     <div className="space-y-4">
