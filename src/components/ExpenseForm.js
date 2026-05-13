@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { addExpense, getCategories } from "@/services/db";
+import { addExpense, getCategories, getExpenses } from "@/services/db";
 import { useAuth } from "@/context/AuthContext";
 import { useWallet } from "@/context/WalletContext";
 
-export default function ExpenseForm({ onExpenseAdded }) {
+export default function ExpenseForm({ onExpenseAdded, selectedMonth }) {
   const { user } = useAuth();
   const { activeWallet } = useWallet();
   const [product, setProduct] = useState("");
@@ -15,17 +15,44 @@ export default function ExpenseForm({ onExpenseAdded }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [categories, setCategories] = useState([]);
+  const [spentByMember, setSpentByMember] = useState({});
+
+  async function loadSelectData() {
+    const [cats, expData] = await Promise.all([
+      getCategories(activeWallet.id),
+      getExpenses(activeWallet.id)
+    ]);
+    setCategories(cats);
+
+    const filteredExpenses = selectedMonth
+      ? expData.filter(expense => {
+          if (!expense.createdAt) return true;
+          const date = expense.createdAt.toDate ? expense.createdAt.toDate() : new Date(expense.createdAt);
+          const expMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+          return expMonth === selectedMonth;
+        })
+      : expData;
+
+    const spentMap = {};
+    filteredExpenses.forEach(expense => {
+      const email = expense.paidBy || expense.userEmail || activeWallet.members[0];
+      spentMap[email] = (spentMap[email] || 0) + (Number(expense.value) || 0);
+    });
+    setSpentByMember(spentMap);
+  }
 
   useEffect(() => {
     if (activeWallet) {
-      loadSelectData();
+      let cancelled = false;
+      setTimeout(() => {
+        if (cancelled) return;
+        loadSelectData();
+      }, 0);
+      return () => {
+        cancelled = true;
+      };
     }
-  }, [activeWallet]);
-
-  const loadSelectData = async () => {
-    const cats = await getCategories(activeWallet.id);
-    setCategories(cats);
-  };
+  }, [activeWallet, selectedMonth]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,6 +86,7 @@ export default function ExpenseForm({ onExpenseAdded }) {
       setValue("");
       setCategoryId("");
       setPaidBy("");
+      await loadSelectData();
       if (onExpenseAdded) onExpenseAdded();
     } catch (error) {
       console.error("Error adding expense:", error);
@@ -126,6 +154,44 @@ export default function ExpenseForm({ onExpenseAdded }) {
             </select>
           </div>
         </div>
+
+        {paidBy && (
+          (() => {
+            const income = Number(activeWallet?.incomes?.[paidBy]) || 0;
+            const spent = spentByMember[paidBy] || 0;
+            const projected = spent + (Number(value) || 0);
+            const percentage = income > 0 ? Math.min((projected / income) * 100, 100) : 0;
+            const formatCurrency = (v) => `$${Number(v || 0).toLocaleString()}`;
+
+            if (income <= 0) {
+              return (
+                <div className="bg-primary/10 p-3 rounded-card border border-primary/20">
+                  <p className="text-xs font-bold text-primary">Consumo de ingreso</p>
+                  <p className="text-[11px] text-text-secondary mt-1">
+                    Define el ingreso mensual de {paidBy.split("@")[0]} en Configuración para ver el porcentaje de uso.
+                  </p>
+                </div>
+              );
+            }
+
+            return (
+              <div className="bg-primary/10 p-3 rounded-card border border-primary/20">
+                <div className="flex justify-between items-center">
+                  <p className="text-xs font-bold text-primary">Consumo de ingreso</p>
+                  <p className="text-xs text-text-secondary font-semibold">{paidBy.split("@")[0]}</p>
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  <p className="text-[11px] text-text-secondary">Este mes (incluye este gasto)</p>
+                  <p className="text-[11px] font-bold text-primary">{formatCurrency(projected)} / {formatCurrency(income)}</p>
+                </div>
+                <div className="w-full bg-[#E8E8E8] rounded-full h-2 overflow-hidden mt-2">
+                  <div className="h-2 rounded-full bg-primary" style={{ width: `${percentage}%` }}></div>
+                </div>
+                <p className="text-[10px] text-right mt-1 text-text-tertiary">{Math.round(percentage)}% usado</p>
+              </div>
+            );
+          })()
+        )}
 
         <button 
           type="submit" 

@@ -12,19 +12,26 @@ export function WalletProvider({ children }) {
   const [activeWallet, setActiveWallet] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  function resetWalletState() {
+    setWallets([]);
+    setActiveWallet(null);
+    setLoading(false);
+  }
+
   useEffect(() => {
     if (authLoading) return;
-    
-    if (user) {
-      loadWallets();
-    } else {
-      setWallets([]);
-      setActiveWallet(null);
-      setLoading(false);
-    }
+    let cancelled = false;
+    setTimeout(() => {
+      if (cancelled) return;
+      if (user) loadWallets();
+      else resetWalletState();
+    }, 0);
+    return () => {
+      cancelled = true;
+    };
   }, [user, authLoading]);
 
-  const loadWallets = async () => {
+  async function loadWallets() {
     setLoading(true);
     let userWallets = await getUserWallets(user.email);
     
@@ -52,16 +59,17 @@ export function WalletProvider({ children }) {
     
     // Set active wallet to personal by default if not set
     if (!activeWallet) {
-      const personalWallet = userWallets.find(w => w.type === "personal") || userWallets[0];
+      const personalWallet = uniqueWallets.find(w => w.type === "personal") || uniqueWallets[0];
       setActiveWallet(personalWallet);
     } else {
-      // Ensure the active wallet still exists
-      const stillExists = userWallets.find(w => w.id === activeWallet.id);
-      if (!stillExists) setActiveWallet(userWallets[0]);
+      // Ensure the active wallet still exists and refresh its data
+      const updated = uniqueWallets.find(w => w.id === activeWallet.id);
+      if (updated) setActiveWallet(updated);
+      else setActiveWallet(uniqueWallets[0] || null);
     }
 
     setLoading(false);
-  };
+  }
 
   const switchWallet = (walletId) => {
     const wallet = wallets.find(w => w.id === walletId);

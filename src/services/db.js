@@ -20,6 +20,7 @@ export const createPersonalWallet = async (userEmail) => {
     name: "Personal",
     type: "personal",
     members: [userEmail],
+    incomes: { [userEmail]: 0 },
     createdAt: new Date()
   });
 };
@@ -29,6 +30,7 @@ export const createSharedWallet = async (userEmail, partnerEmail) => {
     name: "Compartida",
     type: "shared",
     members: [userEmail, partnerEmail],
+    incomes: { [userEmail]: 0, [partnerEmail]: 0 },
     createdAt: new Date()
   });
 };
@@ -40,6 +42,10 @@ export const getUserWallets = async (userEmail) => {
   );
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const updateWalletIncomes = async (walletId, incomes) => {
+  return await updateDoc(doc(db, "wallets", walletId), { incomes, updatedAt: new Date() });
 };
 
 // --- Categories ---
@@ -136,5 +142,4 @@ export const saveFcmToken = async (userEmail, token) => {
     });
   }
 };
-
 

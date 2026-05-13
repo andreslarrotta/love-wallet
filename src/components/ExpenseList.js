@@ -13,13 +13,7 @@ export default function ExpenseList({ refreshTrigger, selectedMonth, showValues 
   // Local state to force reload after delete
   const [localRefresh, setLocalRefresh] = useState(0);
 
-  useEffect(() => {
-    if (activeWallet) {
-      loadData();
-    }
-  }, [activeWallet, refreshTrigger, localRefresh, selectedMonth]);
-
-  const loadData = async () => {
+  async function loadData() {
     setLoading(true);
     const [expData, catData] = await Promise.all([
       getExpenses(activeWallet.id),
@@ -41,7 +35,20 @@ export default function ExpenseList({ refreshTrigger, selectedMonth, showValues 
 
     setExpenses(filteredExpenses);
     setLoading(false);
-  };
+  }
+
+  useEffect(() => {
+    if (activeWallet) {
+      let cancelled = false;
+      setTimeout(() => {
+        if (cancelled) return;
+        loadData();
+      }, 0);
+      return () => {
+        cancelled = true;
+      };
+    }
+  }, [activeWallet, refreshTrigger, localRefresh, selectedMonth]);
 
   const handleDelete = async (id) => {
     if (confirm("¿Estás seguro de que deseas eliminar este gasto?")) {

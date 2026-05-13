@@ -137,7 +137,7 @@ export default function Home() {
       </section>
 
       <section className="mb-section-gap">
-        <ExpenseForm onExpenseAdded={() => { setRefreshKey(k => k + 1); triggerExpenseNotification(); }} />
+        <ExpenseForm selectedMonth={selectedMonth} onExpenseAdded={() => { setRefreshKey(k => k + 1); triggerExpenseNotification(); }} />
       </section>
 
       <section>

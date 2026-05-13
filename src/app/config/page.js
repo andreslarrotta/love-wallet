@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useWallet } from "@/context/WalletContext";
 import { useRouter } from "next/navigation";
-import { addCategory, getCategories, deleteCategory, updateCategory, createSharedWallet } from "@/services/db";
+import { addCategory, getCategories, deleteCategory, updateCategory, createSharedWallet, updateWalletIncomes } from "@/services/db";
 import Link from "next/link";
 
 export default function ConfigPage() {
@@ -20,31 +20,67 @@ export default function ConfigPage() {
   const [editingCategoryId, setEditingCategoryId] = useState(null);
 
   const [partnerEmail, setPartnerEmail] = useState("");
+  const [incomeInputs, setIncomeInputs] = useState({});
 
   const loading = authLoading || walletLoading;
+
+  async function initWallet(wallet) {
+    const cats = await getCategories(wallet.id);
+    setCategories(cats);
+
+    const initialBudgets = {};
+    wallet.members.forEach(member => {
+      initialBudgets[member] = "";
+    });
+    setNewCatBudgets(initialBudgets);
+
+    const initialIncomes = {};
+    wallet.members.forEach(member => {
+      initialIncomes[member] = wallet.incomes?.[member] ?? "";
+    });
+    setIncomeInputs(initialIncomes);
+  }
 
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
     } else if (activeWallet) {
-      loadData();
-      // Initialize budget inputs based on wallet members
-      const initialBudgets = {};
-      activeWallet.members.forEach(member => {
-        initialBudgets[member] = "";
-      });
-      setNewCatBudgets(initialBudgets);
+      let cancelled = false;
+      const wallet = activeWallet;
+      setTimeout(() => {
+        if (cancelled) return;
+        initWallet(wallet);
+      }, 0);
+      return () => {
+        cancelled = true;
+      };
     }
   }, [user, activeWallet, loading, router]);
 
-  const loadData = async () => {
+  async function loadData() {
     if (!activeWallet) return;
     const cats = await getCategories(activeWallet.id);
     setCategories(cats);
-  };
+  }
 
   const handleBudgetChange = (email, value) => {
     setNewCatBudgets(prev => ({ ...prev, [email]: value }));
+  };
+
+  const handleIncomeChange = (email, value) => {
+    setIncomeInputs(prev => ({ ...prev, [email]: value }));
+  };
+
+  const handleSaveIncomes = async (e) => {
+    e.preventDefault();
+    if (!activeWallet) return;
+    const incomesToSave = {};
+    activeWallet.members.forEach(member => {
+      incomesToSave[member] = Number(incomeInputs[member]) || 0;
+    });
+    await updateWalletIncomes(activeWallet.id, incomesToSave);
+    loadWallets();
+    alert("Ingresos actualizados");
   };
 
   const handleSaveCategory = async (e) => {
@@ -171,6 +207,27 @@ export default function ConfigPage() {
                 <li key={member}>• {member} {member === user?.email ? "(Tú)" : ""}</li>
               ))}
             </ul>
+
+            <div className="mt-4 pt-4 border-t border-primary/20">
+              <h3 className="text-sm font-bold text-primary mb-2">Ingresos mensuales</h3>
+              <form onSubmit={handleSaveIncomes} className="space-y-2">
+                {activeWallet?.members.map(member => (
+                  <div key={member} className="flex items-center gap-2">
+                    <span className="text-xs text-text-secondary w-1/2 truncate">{member}</span>
+                    <input
+                      type="number"
+                      placeholder="$"
+                      value={incomeInputs[member] ?? ""}
+                      onChange={(e) => handleIncomeChange(member, e.target.value)}
+                      className="flex-1 h-10 bg-[#F2F2F2] rounded-search-bar px-4 text-sm"
+                    />
+                  </div>
+                ))}
+                <button type="submit" className="w-full h-11 bg-primary text-text-primary font-bold rounded-pill shadow-sm mt-2">
+                  Guardar ingresos
+                </button>
+              </form>
+            </div>
           </div>
         </section>
       )}
