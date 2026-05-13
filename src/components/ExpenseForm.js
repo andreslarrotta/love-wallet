@@ -12,6 +12,10 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
   const [value, setValue] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [paidBy, setPaidBy] = useState("");
+  const [date, setDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [categories, setCategories] = useState([]);
@@ -58,7 +62,8 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
         value: Number(value),
         categoryId,
         paidBy,
-        userEmail: user.email
+        userEmail: user.email,
+        createdAt: new Date(date + "T12:00:00")
       });
 
       // Send notification to other members
@@ -114,6 +119,17 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
             className="w-full h-12 bg-[#F2F2F2] rounded-search-bar px-4 text-sm"
             required
             placeholder="$"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-text-secondary uppercase mb-1">Fecha</label>
+          <input 
+            type="date" 
+            value={date} 
+            onChange={(e) => setDate(e.target.value)}
+            className="w-full h-12 bg-[#F2F2F2] rounded-search-bar px-4 text-sm"
+            required
           />
         </div>
 

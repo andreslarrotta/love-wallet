@@ -103,7 +103,7 @@ export const addExpense = async (walletId, expenseData) => {
   return await addDoc(collection(db, "expenses"), {
     ...expenseData,
     walletId,
-    createdAt: new Date()
+    createdAt: expenseData.createdAt || new Date()
   });
 };
 

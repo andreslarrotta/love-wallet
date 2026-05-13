@@ -229,62 +229,6 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
       </div>
     )}
 
-      <div className="bg-surface p-card-p rounded-card shadow-card mt-section-gap">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h3 className="section-title">Consumo de ingresos</h3>
-            <p className="text-[11px] text-text-tertiary mt-1">Por categoría, contra el ingreso mensual configurado.</p>
-          </div>
-          <Link href="/config" className="text-sm font-semibold text-primary flex items-center gap-1">
-            ⚙️ Configurar
-          </Link>
-        </div>
-
-        <div className="space-y-6">
-          {budgetData.map(cat => (
-            <div key={`${cat.id}-income`} className="border-b border-divider pb-4 last:border-0 last:pb-0">
-              <h4 className="font-bold text-text-primary text-base mb-3">{cat.name}</h4>
-
-              <div className="space-y-4">
-                {cat.membersData.map(data => (
-                  <div key={`${cat.id}-${data.email}-income`}>
-                    <div className="flex justify-between items-end mb-1">
-                      <span className="text-xs font-semibold text-text-secondary w-1/2 truncate">
-                        {data.email.split("@")[0]}
-                      </span>
-
-                      {data.income > 0 ? (
-                        <span className={`text-xs font-medium ${data.incomeIsOver ? "text-red-500" : "text-text-secondary"}`}>
-                          {formatCurrency(data.spent)} / {formatCurrency(data.income)}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-text-tertiary font-medium">Sin ingreso</span>
-                      )}
-                    </div>
-
-                    <div className="w-full bg-[#E8E8E8] rounded-full h-2 overflow-hidden">
-                      <div
-                        className={`h-2 rounded-full transition-all duration-500 ${getProgressColor(data.incomePercentage ?? 0)}`}
-                        style={{ width: `${data.incomePercentage ?? 0}%` }}
-                      ></div>
-                    </div>
-
-                    {data.income > 0 ? (
-                      <p className={`text-[10px] text-right mt-1 ${data.incomeIsOver ? "text-red-500 font-bold" : "text-text-tertiary"}`}>
-                        {Math.round(data.incomePercentage || 0)}% del ingreso usado
-                      </p>
-                    ) : (
-                      <p className="text-[10px] text-right mt-1 text-text-tertiary">
-                        Configura el ingreso mensual para ver el porcentaje.
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </>
   );
 }
