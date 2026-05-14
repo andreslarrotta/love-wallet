@@ -143,3 +143,75 @@ export const saveFcmToken = async (userEmail, token) => {
   }
 };
 
+
+// --- Goals ---
+export const addGoal = async (walletId, goalData) => {
+  return await addDoc(collection(db, "goals"), {
+    ...goalData,
+    walletId,
+    createdAt: new Date()
+  });
+};
+
+export const getGoals = async (walletId) => {
+  if (!walletId) return [];
+  const q = query(
+    collection(db, "goals"), 
+    where("walletId", "==", walletId)
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
+    .sort((a, b) => {
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+      return dateB - dateA;
+    });
+};
+
+export const updateGoal = async (id, goalData) => {
+  return await updateDoc(doc(db, "goals", id), goalData);
+};
+
+export const deleteGoal = async (id) => {
+  return await deleteDoc(doc(db, "goals", id));
+};
+
+// --- Goal Contributions ---
+export const addContribution = async (walletId, contributionData) => {
+  return await addDoc(collection(db, "contributions"), {
+    ...contributionData,
+    walletId,
+    createdAt: new Date()
+  });
+};
+
+export const getContributions = async (walletId, goalId = null) => {
+  if (!walletId) return [];
+  let q;
+  if (goalId) {
+    q = query(
+      collection(db, "contributions"), 
+      where("walletId", "==", walletId),
+      where("goalId", "==", goalId)
+    );
+  } else {
+    q = query(
+      collection(db, "contributions"), 
+      where("walletId", "==", walletId)
+    );
+  }
+  const snapshot = await getDocs(q);
+  return snapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
+    .sort((a, b) => {
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+      return dateB - dateA;
+    });
+};
+
+export const deleteContribution = async (id) => {
+  return await deleteDoc(doc(db, "contributions", id));
+};
+

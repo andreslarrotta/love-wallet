@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import ExpenseForm from "@/components/ExpenseForm";
 import ExpenseList from "@/components/ExpenseList";
 import BudgetSummary from "@/components/BudgetSummary";
+import GoalSummary from "@/components/GoalSummary";
+import GoalForm from "@/components/GoalForm";
 import Modal from "@/components/Modal";
 import Loading from "@/components/Loading";
 import Link from "next/link";
@@ -20,6 +22,7 @@ export default function Home() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [showValues, setShowValues] = useState(true);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
@@ -117,6 +120,26 @@ export default function Home() {
         </div>
       )}
 
+
+
+      {/* Goals Section */}
+      <section className="mb-section-gap">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="section-title">Objetivos de Ahorro</h2>
+          <button 
+            onClick={() => setIsGoalModalOpen(true)}
+            className="text-xs font-bold text-primary flex items-center gap-1 bg-primary/10 px-3 py-1.5 rounded-pill"
+          >
+            🎯 Configurar / Aportar
+          </button>
+        </div>
+        <GoalSummary 
+          refreshTrigger={refreshKey} 
+          selectedMonth={selectedMonth} 
+          showValues={showValues} 
+        />
+      </section>
+
       <section className="mb-section-gap">
         <div className="flex justify-between items-center mb-4">
           <h2 className="section-title">Presupuesto</h2>
@@ -172,6 +195,18 @@ export default function Home() {
             setIsExpenseModalOpen(false);
           }} 
           onClose={() => setIsExpenseModalOpen(false)}
+        />
+      </Modal>
+
+      {/* Goal Modal */}
+      <Modal 
+        isOpen={isGoalModalOpen} 
+        onClose={() => setIsGoalModalOpen(false)}
+        title="Mis Objetivos de Ahorro"
+      >
+        <GoalForm 
+          onGoalUpdated={() => setRefreshKey(k => k + 1)}
+          onClose={() => setIsGoalModalOpen(false)}
         />
       </Modal>
 
