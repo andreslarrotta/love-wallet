@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { getExpenses, getCategories, deleteExpense } from "@/services/db";
 import { useWallet } from "@/context/WalletContext";
 import Loading from "@/components/Loading";
@@ -14,6 +16,20 @@ export default function ExpenseList({ refreshTrigger, selectedMonth, showValues 
   const [loading, setLoading] = useState(true);
 
   const [editingExpense, setEditingExpense] = useState(null);
+  const container = useRef();
+
+  useGSAP(() => {
+    if (!loading && expenses.length > 0) {
+      gsap.from(".gsap-expense-card", {
+        x: -50,
+        opacity: 0,
+        duration: 0.4,
+        stagger: 0.1,
+        ease: "power2.out",
+        clearProps: "all"
+      });
+    }
+  }, { scope: container, dependencies: [loading, expenses] });
 
   // Local state to force reload after delete
   const [localRefresh, setLocalRefresh] = useState(0);
@@ -68,7 +84,7 @@ export default function ExpenseList({ refreshTrigger, selectedMonth, showValues 
   if (loading) return <Loading />;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={container}>
       {/* Total Section */}
       <div className="bg-primary p-4 rounded-card neo-border neo-shadow-sm flex justify-between items-center">
         <span className="text-sm font-bold text-black uppercase">Total del mes</span>
@@ -80,7 +96,7 @@ export default function ExpenseList({ refreshTrigger, selectedMonth, showValues 
       ) : (
         <div className="space-y-3">
           {expenses.map(expense => (
-            <div key={expense.id} className="bg-surface p-4 rounded-card neo-shadow-sm flex justify-between items-center neo-border mb-3">
+            <div key={expense.id} className="bg-surface p-4 rounded-card neo-shadow-sm flex justify-between items-center neo-border mb-3 gsap-expense-card hover:-translate-y-1 transition-transform">
               <div className="flex-1 mr-2">
                 <p className="font-bold text-text-primary text-sm truncate">{expense.product}</p>
                 <div className="flex gap-2 text-[10px] text-black mt-2">

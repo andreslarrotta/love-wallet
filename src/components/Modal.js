@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 export default function Modal({ isOpen, onClose, title, children }) {
   useEffect(() => {
@@ -14,18 +16,27 @@ export default function Modal({ isOpen, onClose, title, children }) {
     };
   }, [isOpen]);
 
+  const container = useRef();
+
+  useGSAP(() => {
+    if (isOpen) {
+      gsap.from(".gsap-backdrop", { opacity: 0, duration: 0.3 });
+      gsap.from(".gsap-modal-content", { y: "100%", opacity: 0, duration: 0.5, ease: "back.out(1.2)" });
+    }
+  }, { scope: container, dependencies: [isOpen] });
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" ref={container}>
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm" 
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm gsap-backdrop" 
         onClick={onClose}
       />
       
       {/* Modal Content */}
-      <div className="relative w-full max-w-lg bg-background rounded-t-[32px] sm:rounded-[32px] border-t-4 border-l-4 border-r-4 sm:border-b-4 border-black shadow-[0px_-4px_0px_#000] sm:shadow-[8px_8px_0px_#000] flex flex-col max-h-[90vh] sm:max-h-[85vh] animate-in slide-in-from-bottom-full duration-300">
+      <div className="relative w-full max-w-lg bg-background rounded-t-[32px] sm:rounded-[32px] border-t-4 border-l-4 border-r-4 sm:border-b-4 border-black shadow-[0px_-4px_0px_#000] sm:shadow-[8px_8px_0px_#000] flex flex-col max-h-[90vh] sm:max-h-[85vh] gsap-modal-content">
         <div className="p-6 pb-0 flex-shrink-0">
           <div className="flex justify-between items-center mb-6 border-b-4 border-black pb-4">
             <h2 className="text-xl font-extrabold text-black uppercase">{title}</h2>

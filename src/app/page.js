@@ -13,6 +13,11 @@ import Modal from "@/components/Modal";
 import Loading from "@/components/Loading";
 import Link from "next/link";
 import { messaging } from "@/lib/firebase";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { useRef } from "react";
+
+gsap.registerPlugin(useGSAP);
 
 export default function Home() {
   const { user, loading: authLoading, logout } = useAuth();
@@ -23,6 +28,21 @@ export default function Home() {
   const [showValues, setShowValues] = useState(true);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const container = useRef();
+
+  useGSAP(() => {
+    gsap.from(".gsap-header", { y: -50, opacity: 0, duration: 0.5, ease: "back.out(1.7)" });
+    gsap.from(".gsap-section", { 
+      y: 30, 
+      opacity: 0, 
+      duration: 0.5, 
+      stagger: 0.15, 
+      ease: "power2.out",
+      delay: 0.2
+    });
+    gsap.from(".gsap-fab", { scale: 0, opacity: 0, duration: 0.5, ease: "back.out(2)", delay: 0.8 });
+    gsap.from(".gsap-nav", { y: 100, opacity: 0, duration: 0.5, ease: "power2.out", delay: 0.5 });
+  }, { scope: container });
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
@@ -85,8 +105,8 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-screen-h pb-24">
-      <header className="mb-section-gap flex justify-between items-center">
+    <div className="min-h-screen bg-background p-screen-h pb-24" ref={container}>
+      <header className="mb-section-gap flex justify-between items-center gsap-header">
         <div>
           <p className="text-sm text-text-secondary">Bienvenido,</p>
           <h1 className="hero-heading">
@@ -103,7 +123,7 @@ export default function Home() {
 
       {/* Wallet Toggle */}
       {wallets.length > 1 && (
-        <div className="flex bg-white neo-border neo-shadow-sm p-1 rounded-pill mb-section-gap">
+        <div className="flex bg-white neo-border neo-shadow-sm p-1 rounded-pill mb-section-gap gsap-section">
           {wallets.map(wallet => (
             <button
               key={wallet.id}
@@ -122,7 +142,7 @@ export default function Home() {
 
 
       {/* Goals Section */}
-      <section className="mb-section-gap">
+      <section className="mb-section-gap gsap-section">
         <div className="flex justify-between items-center mb-4">
           <h2 className="section-title">Objetivos de Ahorro</h2>
           <button
@@ -139,7 +159,7 @@ export default function Home() {
         />
       </section>
 
-      <section className="mb-section-gap">
+      <section className="mb-section-gap gsap-section">
         <div className="flex justify-between items-center mb-4">
           <h2 className="section-title">Presupuesto</h2>
           <div className="flex items-center gap-2">
@@ -161,7 +181,7 @@ export default function Home() {
         <BudgetSummary refreshTrigger={refreshKey} selectedMonth={selectedMonth} showValues={showValues} />
       </section>
 
-      <section>
+      <section className="gsap-section">
         <div className="flex justify-between items-center mb-item-gap">
           <h2 className="section-title">Últimos Gastos</h2>
           <Link href="/config" className="text-sm font-bold text-black flex items-center gap-1 bg-accent px-3 py-1.5 rounded-pill neo-border neo-shadow-sm neo-button">
@@ -179,7 +199,7 @@ export default function Home() {
       {/* Floating Action Button */}
       <button
         onClick={() => setIsExpenseModalOpen(true)}
-        className="fixed bottom-[88px] right-6 h-14 pl-4 pr-6 bg-primary text-text-primary font-bold rounded-pill neo-border neo-shadow flex items-center gap-2 z-40 neo-button animate-in slide-in-from-right-full duration-500"
+        className="fixed bottom-[88px] right-6 h-14 pl-4 pr-6 bg-primary text-text-primary font-bold rounded-pill neo-border neo-shadow flex items-center gap-2 z-40 neo-button gsap-fab"
       >
         <span className="text-2xl">+</span>
         <span className="text-sm uppercase">Nuevo Gasto</span>
@@ -215,12 +235,12 @@ export default function Home() {
       </Modal>
 
       {/* Bottom Nav Mockup */}
-      <nav className="fixed bottom-0 left-0 right-0 h-[72px] bg-white border-t-[3px] border-black flex items-center justify-around px-4 z-40">
+      <nav className="fixed bottom-0 left-0 right-0 h-[72px] bg-white border-t-[3px] border-black flex items-center justify-around px-4 z-40 gsap-nav">
         <Link href="/" className="bg-primary px-5 py-2 rounded-pill flex items-center gap-2 neo-border neo-shadow-sm">
           <span className="text-xl">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#010002" width="24" height="24">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="#010002" strokeWidth="2"></path>
-              <polyline points="9 22 9 12 15 12 15 22" stroke="#010002" stroke-width="2"></polyline>
+              <polyline points="9 22 9 12 15 12 15 22" stroke="#010002" strokeWidth="2"></polyline>
             </svg>
           </span>
           <span className="text-xs font-bold text-text-primary uppercase tracking-wider">Inicio</span>

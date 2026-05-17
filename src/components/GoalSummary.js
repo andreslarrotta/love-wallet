@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { getGoals, getContributions, deleteContribution } from "@/services/db";
 import { useWallet } from "@/context/WalletContext";
 import Loading from "@/components/Loading";
@@ -15,6 +17,19 @@ export default function GoalSummary({ refreshTrigger, selectedMonth, showValues 
   const { activeWallet } = useWallet();
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const container = useRef();
+
+  useGSAP(() => {
+    if (!loading && goals.length > 0) {
+      gsap.from(".gsap-goal-card", {
+        scale: 0.8,
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: "back.out(1.5)"
+      });
+    }
+  }, { scope: container, dependencies: [loading, goals] });
 
   async function fetchData() {
     setLoading(true);
@@ -95,7 +110,7 @@ export default function GoalSummary({ refreshTrigger, selectedMonth, showValues 
   }
 
   return (
-    <div className="relative goal-swiper-container">
+    <div className="relative goal-swiper-container" ref={container}>
       <Swiper
         modules={[Pagination]}
         spaceBetween={16}
@@ -106,7 +121,7 @@ export default function GoalSummary({ refreshTrigger, selectedMonth, showValues 
       >
         {goals.map(goal => (
           <SwiperSlide key={goal.id} className="!w-[85%] md:!w-[400px]">
-            <div className="bg-white p-card-p rounded-card neo-border neo-shadow relative overflow-hidden h-full">
+            <div className="bg-white p-card-p rounded-card neo-border neo-shadow relative overflow-hidden h-full gsap-goal-card">
               {/* Background Decorative Gradient */}
               <div className="absolute top-[-20px] right-[-20px] w-24 h-24 bg-accent rounded-bl-full border-b-[3px] border-l-[3px] border-black"></div>
 

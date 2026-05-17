@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { getExpenses, getCategories } from "@/services/db";
 import { useWallet } from "@/context/WalletContext";
 import Loading from "@/components/Loading";
@@ -12,6 +14,26 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
   const [totalSummary, setTotalSummary] = useState([]);
   const [loading, setLoading] = useState(true);
   const [columns, setColumns] = useState(1);
+  const container = useRef();
+
+  useGSAP(() => {
+    if (!loading) {
+      gsap.from(".gsap-budget-card", {
+        y: 20,
+        opacity: 0,
+        duration: 0.4,
+        stagger: 0.1,
+        ease: "power2.out"
+      });
+      gsap.from(".gsap-progress-bar", {
+        width: 0,
+        duration: 1,
+        stagger: 0.1,
+        ease: "power3.out",
+        delay: 0.2
+      });
+    }
+  }, { scope: container, dependencies: [loading, budgetData, totalSummary] });
 
   async function calculateBudgets() {
     setLoading(true);
@@ -166,7 +188,7 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
   if (loading) return <Loading />;
 
   return (
-    <>
+    <div ref={container}>
       {/* Total Salary Consumption Summary */}
       {totalSummary.length > 0 && (
         <div className="bg-primary p-card-p rounded-card neo-border neo-shadow mb-6">
@@ -182,7 +204,7 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {totalSummary.map(data => (
-              <div key={data.id} className="bg-white p-3 rounded-xl neo-border neo-shadow-sm flex flex-col justify-between">
+              <div key={data.id} className="bg-white p-3 rounded-xl neo-border neo-shadow-sm flex flex-col justify-between gsap-budget-card">
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <span className="text-xs font-extrabold text-black uppercase block truncate pr-2">
@@ -200,7 +222,7 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
                 <div>
                   <div className="w-full bg-white border-2 border-black rounded-full h-4 overflow-hidden shadow-[2px_2px_0px_#000]">
                     <div 
-                      className={`h-full border-r-2 border-black transition-all duration-500 ${getProgressColor(data.percentage)}`} 
+                      className={`h-full border-r-2 border-black gsap-progress-bar ${getProgressColor(data.percentage)}`} 
                       style={{ width: `${data.percentage}%` }}
                     ></div>
                   </div>
@@ -247,7 +269,7 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
             const totalSpent = cat.membersData.reduce((sum, d) => sum + d.spent, 0);
             const totalBudget = cat.membersData.reduce((sum, d) => sum + d.budget, 0);
             return (
-              <div key={cat.id} className="bg-white p-4 rounded-xl neo-border neo-shadow-sm flex flex-col">
+              <div key={cat.id} className="bg-white p-4 rounded-xl neo-border neo-shadow-sm flex flex-col gsap-budget-card">
                 <div className="flex justify-between items-start mb-3 border-b-2 border-black pb-2">
                   <h3 className="font-extrabold text-black text-sm uppercase truncate pr-2">{cat.name}</h3>
                   <div className="text-right flex-shrink-0">
@@ -275,7 +297,7 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
                       
                       <div className="w-full bg-white border-2 border-black rounded-full h-3 overflow-hidden shadow-[2px_2px_0px_#000]">
                         <div 
-                          className={`h-full border-r-2 border-black transition-all duration-500 ${getProgressColor(data.percentage)}`} 
+                          className={`h-full border-r-2 border-black gsap-progress-bar ${getProgressColor(data.percentage)}`} 
                           style={{ width: `${data.percentage}%` }}
                         ></div>
                       </div>
@@ -298,6 +320,6 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
         </div>
     )}
 
-    </>
+    </div>
   );
 }
