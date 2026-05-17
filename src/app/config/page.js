@@ -151,7 +151,7 @@ export default function ConfigPage() {
   return (
     <div className="min-h-screen bg-background p-screen-h pb-24 overflow-y-auto">
       <header className="mb-section-gap flex items-center gap-4">
-        <Link href="/" className="w-10 h-10 rounded-full bg-surface shadow-card flex items-center justify-center text-xl">
+        <Link href="/" className="w-10 h-10 rounded-full bg-white border-2 border-black shadow-[2px_2px_0px_#000] flex items-center justify-center text-xl neo-button">
           ←
         </Link>
         <h1 className="hero-heading">Configuración</h1>
@@ -159,14 +159,14 @@ export default function ConfigPage() {
 
       {/* Wallet Toggle */}
       {wallets.length > 1 && (
-        <div className="flex bg-[#F2F2F2] p-1 rounded-pill mb-section-gap">
+        <div className="flex bg-white neo-border neo-shadow-sm p-1 rounded-pill mb-section-gap">
           {wallets.map(wallet => (
             <button
               key={wallet.id}
               onClick={() => switchWallet(wallet.id)}
-              className={`flex-1 py-2 text-sm font-bold rounded-pill transition-all ${
+              className={`flex-1 py-2 text-sm font-extrabold rounded-pill transition-all ${
                 activeWallet?.id === wallet.id 
-                  ? "bg-white text-primary shadow-sm" 
+                  ? "bg-primary text-black border-2 border-black shadow-[2px_2px_0px_#000]" 
                   : "text-text-secondary"
               }`}
             >
@@ -180,8 +180,8 @@ export default function ConfigPage() {
       {activeWallet?.type === "personal" ? (
         <section className="mb-section-gap">
           <h2 className="section-title mb-4">Compartir Gastos</h2>
-          <div className="p-card-p bg-surface rounded-card shadow-sm border border-primary/20">
-            <p className="text-sm text-text-secondary mb-3">
+          <div className="p-card-p bg-secondary rounded-card neo-border neo-shadow-sm">
+            <p className="text-sm text-black font-bold mb-3">
               Ingresa el correo de tu pareja para crear una billetera compartida.
             </p>
             <form onSubmit={handleCreateSharedWallet} className="flex gap-2">
@@ -190,10 +190,10 @@ export default function ConfigPage() {
                 placeholder="correo@ejemplo.com" 
                 value={partnerEmail}
                 onChange={(e) => setPartnerEmail(e.target.value)}
-                className="flex-1 h-12 bg-[#F2F2F2] rounded-search-bar px-4 text-sm"
+                className="flex-1 h-12 bg-white border-2 border-black rounded-search-bar px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none"
                 required
               />
-              <button type="submit" className="w-12 h-12 bg-primary text-text-primary font-bold rounded-search-bar flex items-center justify-center shadow-sm text-xl">
+              <button type="submit" className="w-12 h-12 bg-primary text-black font-extrabold rounded-search-bar flex items-center justify-center border-2 border-black shadow-[2px_2px_0px_#000] text-xl neo-button">
                 +
               </button>
             </form>
@@ -201,30 +201,30 @@ export default function ConfigPage() {
         </section>
       ) : (
         <section className="mb-section-gap">
-          <div className="p-card-p bg-primary/10 rounded-card border border-primary/20">
-            <h2 className="text-sm font-bold text-primary mb-2">Billetera Compartida con:</h2>
-            <ul className="text-xs text-text-secondary font-medium space-y-1">
+          <div className="p-card-p bg-secondary rounded-card neo-border neo-shadow-sm">
+            <h2 className="text-sm font-extrabold text-black uppercase mb-2">Billetera Compartida con:</h2>
+            <ul className="text-xs text-black font-bold space-y-1">
               {activeWallet?.members.map(member => (
                 <li key={member}>• {member} {member === user?.email ? "(Tú)" : ""}</li>
               ))}
             </ul>
 
-            <div className="mt-4 pt-4 border-t border-primary/20">
-              <h3 className="text-sm font-bold text-primary mb-2">Ingresos mensuales</h3>
+            <div className="mt-4 pt-4 border-t-2 border-black">
+              <h3 className="text-sm font-extrabold text-black uppercase mb-2">Ingresos mensuales</h3>
               <form onSubmit={handleSaveIncomes} className="space-y-2">
                 {activeWallet?.members.map(member => (
                   <div key={member} className="flex items-center gap-2">
-                    <span className="text-xs text-text-secondary w-1/2 truncate">{member}</span>
+                    <span className="text-xs text-black font-bold w-1/2 truncate">{member}</span>
                     <input
                       type="number"
                       placeholder="$"
                       value={incomeInputs[member] ?? ""}
                       onChange={(e) => handleIncomeChange(member, e.target.value)}
-                      className="flex-1 h-10 bg-[#F2F2F2] rounded-search-bar px-4 text-sm"
+                      className="flex-1 h-10 bg-white border-2 border-black rounded-search-bar px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none focus:bg-primary/10 focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-none transition-all"
                     />
                   </div>
                 ))}
-                <button type="submit" className="w-full h-11 bg-primary text-text-primary font-bold rounded-pill shadow-sm mt-2">
+                <button type="submit" className="w-full h-11 bg-primary text-black font-extrabold rounded-pill border-2 border-black shadow-[2px_2px_0px_#000] mt-2 neo-button">
                   Guardar ingresos
                 </button>
               </form>
@@ -237,62 +237,62 @@ export default function ConfigPage() {
       <section className="mb-section-gap">
         <h2 className="section-title mb-4">Categorías y Presupuesto</h2>
         
-        <form onSubmit={handleSaveCategory} className="bg-surface p-4 rounded-card shadow-sm mb-4">
-          <h3 className="text-sm font-bold mb-2">{editingCategoryId ? "Editar Categoría" : "Nueva Categoría"}</h3>
+        <form onSubmit={handleSaveCategory} className="bg-secondary p-4 rounded-card neo-border neo-shadow-sm mb-4">
+          <h3 className="text-sm font-bold text-black mb-2">{editingCategoryId ? "Editar Categoría" : "Nueva Categoría"}</h3>
           
           <input 
             type="text" 
             placeholder="Ej: Mercado" 
             value={newCatName}
             onChange={(e) => setNewCatName(e.target.value)}
-            className="w-full h-12 bg-[#F2F2F2] rounded-search-bar px-4 text-sm mb-3"
+            className="w-full h-12 bg-white border-2 border-black rounded-search-bar px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none mb-3"
             required
           />
           
-          <p className="text-xs text-text-secondary mb-2 font-semibold">Presupuesto asignado a cada uno:</p>
+          <p className="text-[10px] text-black font-extrabold uppercase mb-2">Presupuesto asignado a cada uno:</p>
           {activeWallet?.members.map(member => (
             <div key={member} className="flex items-center gap-2 mb-2">
-              <span className="text-xs text-text-secondary w-1/2 truncate">{member}</span>
+              <span className="text-xs text-black font-bold w-1/2 truncate">{member}</span>
               <input 
                 type="number" 
                 placeholder="$" 
                 value={newCatBudgets[member] || ""}
                 onChange={(e) => handleBudgetChange(member, e.target.value)}
-                className="flex-1 h-10 bg-[#F2F2F2] rounded-search-bar px-4 text-sm"
+                className="flex-1 h-10 bg-white border-2 border-black rounded-search-bar px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none focus:bg-primary/10 focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-none transition-all"
                 required
               />
             </div>
           ))}
 
           <div className="flex gap-2 mt-4">
-            <button type="submit" className="flex-1 h-12 bg-primary text-text-primary font-bold rounded-pill shadow-sm">
+            <button type="submit" className="flex-1 h-12 bg-primary text-black font-extrabold rounded-pill border-2 border-black shadow-[2px_2px_0px_#000] neo-button">
               {editingCategoryId ? "Guardar Cambios" : "Crear Categoría"}
             </button>
             {editingCategoryId && (
-              <button type="button" onClick={handleCancelEdit} className="h-12 px-4 bg-[#F2F2F2] text-text-secondary font-bold rounded-pill">
+              <button type="button" onClick={handleCancelEdit} className="h-12 px-4 bg-white text-black font-bold rounded-pill border-2 border-black shadow-[2px_2px_0px_#000] neo-button">
                 Cancelar
               </button>
             )}
           </div>
         </form>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           {categories.map(cat => (
-            <div key={cat.id} className="p-card-p bg-surface rounded-card shadow-sm">
+            <div key={cat.id} className="p-card-p bg-white rounded-card neo-border neo-shadow-sm">
               <div className="flex justify-between items-center mb-2">
-                <p className="card-title text-lg">{cat.name}</p>
+                <p className="card-title text-lg uppercase">{cat.name}</p>
                 <div className="flex gap-2">
-                  <button onClick={() => handleEditCategory(cat)} className="text-blue-500 text-sm font-semibold">Editar</button>
-                  <button onClick={() => handleDeleteCategory(cat.id)} className="text-red-500 text-sm font-semibold">Eliminar</button>
+                  <button onClick={() => handleEditCategory(cat)} className="text-black bg-accent border-2 border-black px-2 py-0.5 rounded-pill shadow-[2px_2px_0px_#000] text-[10px] font-bold neo-button">Editar</button>
+                  <button onClick={() => handleDeleteCategory(cat.id)} className="text-black bg-white border-2 border-black px-2 py-0.5 rounded-pill shadow-[2px_2px_0px_#000] text-[10px] font-bold neo-button">Eliminar</button>
                 </div>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-2 mt-4 pt-2 border-t-2 border-black">
                 {activeWallet?.members.map(member => {
                   const amt = cat.budgets?.[member] || (cat.budget ? cat.budget : 0);
                   return (
-                    <div key={member} className="flex justify-between text-xs text-text-secondary">
-                      <span className="truncate w-2/3">{member}</span>
-                      <span className="font-bold text-primary">${amt.toLocaleString()}</span>
+                    <div key={member} className="flex justify-between items-center text-xs text-text-secondary">
+                      <span className="truncate w-2/3 text-black font-bold">{member}</span>
+                      <span className="font-extrabold text-black bg-primary px-2 py-0.5 rounded-pill border-2 border-black shadow-[2px_2px_0px_#000]">${amt.toLocaleString()}</span>
                     </div>
                   );
                 })}
