@@ -148,13 +148,13 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose, in
             type="date" 
             value={date} 
             onChange={(e) => setDate(e.target.value)}
-            className="w-full h-12 bg-white border-2 border-black rounded-lg px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none focus:bg-primary/10 focus:translate-y-[2px] focus:translate-x-[2px] focus:shadow-none transition-all"
+            className="w-full h-12 bg-white border-2 border-black rounded-lg px-2 sm:px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none focus:bg-primary/10 focus:translate-y-[2px] focus:translate-x-[2px] focus:shadow-none transition-all appearance-none block"
             required
           />
         </div>
 
-        <div className="flex gap-4">
-          <div className="flex-1">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 min-w-0">
             <label className="block text-xs font-semibold text-text-secondary uppercase mb-1">Categoría</label>
             <select 
               value={categoryId} 
@@ -169,7 +169,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose, in
             </select>
           </div>
 
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <label className="block text-xs font-semibold text-text-secondary uppercase mb-1">Pagado por</label>
             <select 
               value={paidBy} 
