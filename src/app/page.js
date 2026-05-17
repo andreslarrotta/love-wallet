@@ -97,7 +97,7 @@ export default function Home() {
           onClick={() => logout()}
           className="w-10 h-10 rounded-full neo-border overflow-hidden neo-shadow-sm flex items-center justify-center bg-white text-xl neo-button"
         >
-          🚪
+          <svg viewBox="0 0 24 24" width="24px" height="24px"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="#010002" /></svg>
         </button>
       </header>
 
@@ -219,7 +219,7 @@ export default function Home() {
         <Link href="/" className="bg-primary px-5 py-2 rounded-pill flex items-center gap-2 neo-border neo-shadow-sm">
           <span className="text-xl">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#010002" width="24" height="24">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="#010002" stroke-width="2"></path>
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="#010002" strokeWidth="2"></path>
               <polyline points="9 22 9 12 15 12 15 22" stroke="#010002" stroke-width="2"></polyline>
             </svg>
           </span>
