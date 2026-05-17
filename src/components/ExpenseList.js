@@ -65,9 +65,9 @@ export default function ExpenseList({ refreshTrigger, selectedMonth, showValues 
   return (
     <div className="space-y-4">
       {/* Total Section */}
-      <div className="bg-primary/10 p-4 rounded-card border border-primary/20 flex justify-between items-center">
-        <span className="text-sm font-bold text-primary uppercase">Total del mes</span>
-        <span className="text-xl font-extrabold text-primary">{formatCurrency(totalSpent)}</span>
+      <div className="bg-primary p-4 rounded-card neo-border neo-shadow-sm flex justify-between items-center">
+        <span className="text-sm font-bold text-black uppercase">Total del mes</span>
+        <span className="text-xl font-extrabold text-black">{formatCurrency(totalSpent)}</span>
       </div>
 
       {expenses.length === 0 ? (
@@ -75,30 +75,30 @@ export default function ExpenseList({ refreshTrigger, selectedMonth, showValues 
       ) : (
         <div className="space-y-3">
           {expenses.map(expense => (
-            <div key={expense.id} className="bg-surface p-4 rounded-card shadow-sm flex justify-between items-center border border-border">
+            <div key={expense.id} className="bg-surface p-4 rounded-card neo-shadow-sm flex justify-between items-center neo-border mb-3">
               <div className="flex-1 mr-2">
                 <p className="font-bold text-text-primary text-sm truncate">{expense.product}</p>
-                <div className="flex gap-2 text-[10px] text-text-secondary mt-1">
-                  <span className="bg-[#F2F2F2] px-2 py-0.5 rounded-pill truncate max-w-[100px]">
+                <div className="flex gap-2 text-[10px] text-black mt-2">
+                  <span className="bg-white border-2 border-black shadow-[2px_2px_0px_#000] font-bold px-2 py-0.5 rounded-pill truncate max-w-[100px]">
                     {categories[expense.categoryId]?.name || "Sin categoría"}
                   </span>
-                  <span className="bg-[#F2F2F2] px-2 py-0.5 rounded-pill truncate max-w-[120px]" title={expense.paidBy}>
+                  <span className="bg-white border-2 border-black shadow-[2px_2px_0px_#000] font-bold px-2 py-0.5 rounded-pill truncate max-w-[120px]" title={expense.paidBy}>
                     🧑 {expense.paidBy?.split('@')[0] || "Desconocido"}
                   </span>
                 </div>
               </div>
               <div className="text-right flex items-center gap-3">
                 <div>
-                  <p className="font-extrabold text-base text-primary">
+                  <p className="font-extrabold text-base text-black">
                     {formatCurrency(expense.value)}
                   </p>
-                  <p className="text-[10px] text-text-tertiary">
+                  <p className="text-[10px] text-text-tertiary font-bold">
                     {expense.createdAt?.toDate().toLocaleDateString()}
                   </p>
                 </div>
                 <button 
                   onClick={() => handleDelete(expense.id)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-red-100 text-red-500 hover:bg-red-200 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-accent border-2 border-black shadow-[2px_2px_0px_#000] text-black neo-button transition-colors"
                   title="Eliminar gasto"
                 >
                   🗑️

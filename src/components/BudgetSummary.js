@@ -128,32 +128,32 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
     <>
       {/* Total Salary Consumption Summary */}
       {totalSummary.length > 0 && (
-        <div className="bg-primary/5 p-card-p rounded-card border border-primary/20 mb-6">
+        <div className="bg-primary p-card-p rounded-card neo-border neo-shadow mb-6">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h3 className="text-sm font-bold text-primary">Consumo Total de Salario</h3>
-              <p className="text-[10px] text-text-tertiary">Total gastado este mes frente al ingreso configurado.</p>
+              <h3 className="text-sm font-extrabold text-black uppercase">Consumo Total de Salario</h3>
+              <p className="text-[10px] text-black font-medium mt-1">Total gastado este mes frente al ingreso configurado.</p>
             </div>
-            <Link href="/config" className="text-[10px] font-bold text-primary uppercase tracking-wider bg-white px-2 py-1 rounded-pill shadow-sm">
+            <Link href="/config" className="text-[10px] font-bold text-black uppercase tracking-wider bg-white px-2 py-1 rounded-pill border-2 border-black shadow-[2px_2px_0px_#000] neo-button">
               Configurar
             </Link>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {totalSummary.map(data => (
-              <div key={`${data.email}-total`} className="bg-white p-3 rounded-xl shadow-sm border border-divider">
+              <div key={`${data.email}-total`} className="bg-white p-3 rounded-xl neo-border neo-shadow-sm">
                 <div className="flex justify-between items-end mb-2">
                   <span className="text-xs font-bold text-text-secondary truncate pr-2">
                     {data.email.split("@")[0]}
                   </span>
-                  <span className={`text-xs font-bold ${data.isOver ? "text-red-500" : "text-primary"}`}>
+                  <span className={`text-xs font-bold ${data.isOver ? "text-red-600" : "text-black"}`}>
                     {formatCurrency(data.spent)} / {formatCurrency(data.income)}
                   </span>
                 </div>
 
-                <div className="w-full bg-[#F2F2F2] rounded-full h-2.5 overflow-hidden">
+                <div className="w-full bg-white border-2 border-black rounded-full h-4 overflow-hidden shadow-[2px_2px_0px_#000]">
                   <div 
-                    className={`h-full rounded-full transition-all duration-500 ${getProgressColor(data.percentage)}`} 
+                    className={`h-full border-r-2 border-black transition-all duration-500 ${getProgressColor(data.percentage)}`} 
                     style={{ width: `${data.percentage}%` }}
                   ></div>
                 </div>
@@ -178,17 +178,17 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
       )}
 
       {budgetData.length === 0 ? (
-        <div className="text-center py-8 bg-surface rounded-card shadow-sm border border-divider">
-          <p className="text-text-secondary text-sm mb-4">No hay categorías configuradas para presupuestos.</p>
-          <Link href="/config" className="text-primary font-bold text-sm">
+        <div className="text-center py-8 bg-surface rounded-card neo-border neo-shadow-sm">
+          <p className="text-text-secondary font-bold text-sm mb-4">No hay categorías configuradas para presupuestos.</p>
+          <Link href="/config" className="text-black bg-primary px-4 py-2 rounded-pill neo-border neo-shadow-sm font-bold text-sm">
             + Configurar Presupuesto
           </Link>
         </div>
       ) : (
-        <div className="bg-surface p-card-p rounded-card shadow-card space-y-6">
+        <div className="bg-surface p-card-p rounded-card neo-border neo-shadow space-y-6">
         {budgetData.map(cat => (
-          <div key={cat.id} className="border-b border-divider pb-4 last:border-0 last:pb-0">
-            <h3 className="font-bold text-text-primary text-lg mb-3">{cat.name}</h3>
+          <div key={cat.id} className="border-b-4 border-black pb-4 last:border-0 last:pb-0">
+            <h3 className="font-extrabold text-black text-xl mb-3 uppercase">{cat.name}</h3>
             
             <div className="space-y-4">
               {cat.membersData.map(data => (
@@ -207,9 +207,9 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
                     </span>
                   </div>
                   
-                  <div className="w-full bg-[#E8E8E8] rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-white border-2 border-black rounded-full h-3 overflow-hidden shadow-[2px_2px_0px_#000]">
                     <div 
-                      className={`h-2 rounded-full transition-all duration-500 ${getProgressColor(data.percentage)}`} 
+                      className={`h-full border-r-2 border-black transition-all duration-500 ${getProgressColor(data.percentage)}`} 
                       style={{ width: `${data.percentage}%` }}
                     ></div>
                   </div>

@@ -1,72 +1,78 @@
 @import "tailwindcss";
 
 @theme {
-  /* Colors */
-  --color-primary: #F5C518;
-  --color-primary-light: #FFD84D;
-  --color-primary-dark: #D4A800;
-  --color-primary-soft: #FFF8DC;
+  /* Colors - Neo Brutalism */
+  --color-primary: #FFE600; /* Bright yellow */
+  --color-primary-light: #FFF066;
+  --color-primary-dark: #CCB800;
+  --color-primary-soft: #FFFBE6;
+
+  --color-secondary: #B4F8C8; /* Mint/Lime green */
+  --color-accent: #FFA1F5; /* Bright pink */
 
   --color-neutral-white: #FFFFFF;
-  --color-background: #F9F9F9;
+  --color-background: #B6A6FF; /* Lavender background */
   --color-surface: #FFFFFF;
-  --color-border: #EFEFEF;
-  --color-divider: #E8E8E8;
+  
+  /* Borders are now stark black */
+  --color-border: #000000;
+  --color-divider: #000000;
 
-  --color-text-primary: #1A1A1A;
-  --color-text-secondary: #6B6B6B;
-  --color-text-tertiary: #A0A0A0;
-  --color-text-highlight: #F5C518;
+  --color-text-primary: #000000;
+  --color-text-secondary: #000000;
+  --color-text-tertiary: #333333;
+  --color-text-highlight: #FFE600;
 
-  --color-icon-default: #1A1A1A;
-  --color-icon-muted: #AAAAAA;
-  --color-icon-active: #F5C518;
+  --color-icon-default: #000000;
+  --color-icon-muted: #333333;
+  --color-icon-active: #000000;
 
   /* Typography */
-  --font-display: "Nunito", "Poppins", sans-serif;
-  --font-body: "Nunito", "Poppins", sans-serif;
+  --font-display: "Space Grotesk", "Nunito", "Poppins", sans-serif;
+  --font-body: "Space Grotesk", "Nunito", "Poppins", sans-serif;
 
-  --text-xs: 11px;
-  --text-sm: 13px;
-  --text-base: 15px;
-  --text-md: 17px;
-  --text-lg: 20px;
-  --text-xl: 24px;
-  --text-2xl: 28px;
-  --text-3xl: 34px;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-md: 18px;
+  --text-lg: 22px;
+  --text-xl: 26px;
+  --text-2xl: 32px;
+  --text-3xl: 40px;
 
-  --font-weight-regular: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
+  --font-weight-regular: 500;
+  --font-weight-medium: 600;
+  --font-weight-semibold: 700;
   --font-weight-bold: 700;
-  --font-weight-extrabold: 800;
+  --font-weight-extrabold: 700; /* Space Grotesk maxes at 700 usually */
 
   /* Spacing */
   --spacing-screen-h: 20px;
   --spacing-screen-v: 24px;
   --spacing-card-p: 16px;
-  --spacing-section-gap: 24px;
-  --spacing-item-gap: 12px;
+  --spacing-section-gap: 32px;
+  --spacing-item-gap: 16px;
 
   /* Border Radius */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
   --radius-2xl: 24px;
   --radius-card: 16px;
-  --radius-chip: 999px;
-  --radius-search-bar: 12px;
+  --radius-pill: 999px;
+  --radius-search-bar: 8px;
 
-  /* Shadows */
-  --shadow-card: 0px 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-card-hover: 0px 8px 24px rgba(0, 0, 0, 0.12);
-  --shadow-fab: 0px 6px 20px rgba(245, 197, 24, 0.45);
-  --shadow-nav-bar: 0px -2px 12px rgba(0, 0, 0, 0.06);
+  /* Shadows - Hard Black Offsets for Neo Brutalism */
+  --shadow-card: 4px 4px 0px 0px #000000;
+  --shadow-card-hover: 6px 6px 0px 0px #000000;
+  --shadow-fab: 6px 6px 0px 0px #000000;
+  --shadow-nav-bar: 0px -4px 0px 0px #000000;
+  --shadow-sm: 2px 2px 0px 0px #000000;
 }
 
 @layer base {
-  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
   body {
     background-color: var(--color-background);
@@ -78,48 +84,81 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     font-weight: var(--font-weight-bold);
+    letter-spacing: -0.02em;
   }
 }
 
 /* Custom Component Styles based on tokens */
 @layer components {
   .hero-heading {
-    font-size: var(--text-2xl);
+    font-size: var(--text-3xl);
     font-weight: var(--font-weight-extrabold);
-    line-height: 1.2;
+    line-height: 1.1;
     color: var(--color-text-primary);
+    text-transform: uppercase;
   }
 
   .hero-highlight {
     color: var(--color-primary);
+    text-shadow: 2px 2px 0px #000;
+    -webkit-text-stroke: 1px black; /* Bold outlined look for highlight */
   }
 
   .section-title {
-    font-size: var(--text-lg);
+    font-size: var(--text-xl);
     font-weight: var(--font-weight-bold);
     color: var(--color-text-primary);
+    border-bottom: 3px solid var(--color-border);
+    display: inline-block;
+    padding-bottom: 2px;
   }
 
   .card-title {
-    font-size: var(--text-base);
+    font-size: var(--text-lg);
     font-weight: var(--font-weight-bold);
     color: var(--color-text-primary);
   }
 
   .card-subtitle {
     font-size: var(--text-sm);
-    font-weight: var(--font-weight-regular);
+    font-weight: var(--font-weight-medium);
     color: var(--color-text-secondary);
   }
 
   .recipe-card {
     background-color: var(--color-surface);
     border-radius: var(--radius-card);
-    shadow: var(--shadow-card);
-    transition: shadow var(--animate-duration-normal) var(--animate-easing-default);
+    border: 3px solid var(--color-border);
+    box-shadow: var(--shadow-card);
+    transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
   }
 
   .recipe-card:hover {
-    shadow: var(--shadow-card-hover);
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-card-hover);
+  }
+  
+  /* Neobrutalism utility classes to use throughout */
+  .neo-border {
+    border: 3px solid var(--color-border);
+  }
+  
+  .neo-shadow {
+    box-shadow: var(--shadow-card);
+  }
+  
+  .neo-shadow-sm {
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .neo-button {
+    border: 3px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.1s ease-in-out;
+  }
+  
+  .neo-button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0px 0px 0px 0px #000000;
   }
 }

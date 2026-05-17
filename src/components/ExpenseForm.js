@@ -95,7 +95,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
   };
 
   return (
-    <div className="bg-surface p-card-p rounded-card shadow-card">
+    <div className="bg-surface p-card-p rounded-card neo-border neo-shadow">
       <h3 className="section-title mb-4">Nuevo Gasto</h3>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
@@ -104,7 +104,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
             type="text" 
             value={product} 
             onChange={(e) => setProduct(e.target.value)}
-            className="w-full h-12 bg-[#F2F2F2] rounded-search-bar px-4 text-sm"
+            className="w-full h-12 bg-white border-2 border-black rounded-lg px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none focus:bg-primary/10 focus:translate-y-[2px] focus:translate-x-[2px] focus:shadow-none transition-all"
             required
             placeholder="Ej: Cena restaurante"
           />
@@ -116,7 +116,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
             type="number" 
             value={value} 
             onChange={(e) => setValue(e.target.value)}
-            className="w-full h-12 bg-[#F2F2F2] rounded-search-bar px-4 text-sm"
+            className="w-full h-12 bg-white border-2 border-black rounded-lg px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none focus:bg-primary/10 focus:translate-y-[2px] focus:translate-x-[2px] focus:shadow-none transition-all"
             required
             placeholder="$"
           />
@@ -128,7 +128,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
             type="date" 
             value={date} 
             onChange={(e) => setDate(e.target.value)}
-            className="w-full h-12 bg-[#F2F2F2] rounded-search-bar px-4 text-sm"
+            className="w-full h-12 bg-white border-2 border-black rounded-lg px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none focus:bg-primary/10 focus:translate-y-[2px] focus:translate-x-[2px] focus:shadow-none transition-all"
             required
           />
         </div>
@@ -139,7 +139,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
             <select 
               value={categoryId} 
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full h-12 bg-[#F2F2F2] rounded-search-bar px-4 text-sm appearance-none"
+              className="w-full h-12 bg-white border-2 border-black rounded-lg px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none focus:bg-primary/10 focus:translate-y-[2px] focus:translate-x-[2px] focus:shadow-none transition-all appearance-none"
               required
             >
               <option value="">Selecciona...</option>
@@ -154,7 +154,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
             <select 
               value={paidBy} 
               onChange={(e) => setPaidBy(e.target.value)}
-              className="w-full h-12 bg-[#F2F2F2] rounded-search-bar px-4 text-sm appearance-none"
+              className="w-full h-12 bg-white border-2 border-black rounded-lg px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none focus:bg-primary/10 focus:translate-y-[2px] focus:translate-x-[2px] focus:shadow-none transition-all appearance-none"
               required
             >
               <option value="">Selecciona...</option>
@@ -175,9 +175,9 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
 
             if (income <= 0) {
               return (
-                <div className="bg-primary/10 p-3 rounded-card border border-primary/20">
-                  <p className="text-xs font-bold text-primary">Consumo de ingreso</p>
-                  <p className="text-[11px] text-text-secondary mt-1">
+                <div className="bg-secondary p-3 rounded-card neo-border neo-shadow-sm">
+                  <p className="text-xs font-bold text-black uppercase">Consumo de ingreso</p>
+                  <p className="text-[11px] text-black font-medium mt-1">
                     Define el ingreso mensual de {paidBy.split("@")[0]} en Configuración para ver el porcentaje de uso.
                   </p>
                 </div>
@@ -185,19 +185,19 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
             }
 
             return (
-              <div className="bg-primary/10 p-3 rounded-card border border-primary/20">
+              <div className="bg-secondary p-3 rounded-card neo-border neo-shadow-sm mt-4">
                 <div className="flex justify-between items-center">
-                  <p className="text-xs font-bold text-primary">Consumo de ingreso</p>
-                  <p className="text-xs text-text-secondary font-semibold">{paidBy.split("@")[0]}</p>
+                  <p className="text-xs font-bold text-black uppercase">Consumo de ingreso</p>
+                  <p className="text-xs text-black font-extrabold">{paidBy.split("@")[0]}</p>
                 </div>
                 <div className="flex justify-between items-center mt-1">
-                  <p className="text-[11px] text-text-secondary">Este mes (incluye este gasto)</p>
-                  <p className="text-[11px] font-bold text-primary">{formatCurrency(projected)} / {formatCurrency(income)}</p>
+                  <p className="text-[11px] text-black font-medium">Este mes (incluye este gasto)</p>
+                  <p className="text-[11px] font-extrabold text-black">{formatCurrency(projected)} / {formatCurrency(income)}</p>
                 </div>
-                <div className="w-full bg-[#E8E8E8] rounded-full h-2 overflow-hidden mt-2">
-                  <div className="h-2 rounded-full bg-primary" style={{ width: `${percentage}%` }}></div>
+                <div className="w-full bg-white border-2 border-black rounded-full h-3 overflow-hidden mt-2 shadow-[2px_2px_0px_#000]">
+                  <div className="h-full border-r-2 border-black bg-primary" style={{ width: `${percentage}%` }}></div>
                 </div>
-                <p className="text-[10px] text-right mt-1 text-text-tertiary">{Math.round(percentage)}% usado</p>
+                <p className="text-[10px] text-right mt-1 text-black font-bold">{Math.round(percentage)}% usado</p>
               </div>
             );
           })()
@@ -208,7 +208,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
             <button 
               type="button"
               onClick={onClose}
-              className="flex-1 h-12 bg-[#F2F2F2] text-text-secondary font-bold rounded-pill"
+              className="flex-1 h-12 bg-white text-black font-bold rounded-pill neo-border neo-shadow-sm neo-button"
             >
               Cancelar
             </button>
@@ -216,7 +216,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
           <button 
             type="submit" 
             disabled={isSubmitting}
-            className={`flex-[2] h-12 bg-primary text-text-primary font-bold rounded-pill shadow-fab disabled:opacity-50`}
+            className={`flex-[2] h-12 bg-primary text-black font-extrabold rounded-pill neo-border neo-shadow neo-button disabled:opacity-50`}
           >
             {isSubmitting ? "Guardando..." : "Guardar Gasto"}
           </button>

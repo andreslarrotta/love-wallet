@@ -104,16 +104,16 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
   return (
     <div className="space-y-6">
       {/* View Selector */}
-      <div className="flex bg-[#F2F2F2] p-1 rounded-pill">
+      <div className="flex bg-white neo-border neo-shadow-sm p-1 rounded-pill">
         <button 
           onClick={() => setView("contribute")}
-          className={`flex-1 py-2 text-xs font-bold rounded-pill transition-all ${view === "contribute" ? "bg-white text-primary shadow-sm" : "text-text-secondary"}`}
+          className={`flex-1 py-2 text-xs font-extrabold rounded-pill transition-all ${view === "contribute" ? "bg-primary text-black border-2 border-black shadow-[2px_2px_0px_#000]" : "text-text-secondary"}`}
         >
           Aportar
         </button>
         <button 
           onClick={() => setView("manage")}
-          className={`flex-1 py-2 text-xs font-bold rounded-pill transition-all ${view === "manage" || view === "edit" ? "bg-white text-primary shadow-sm" : "text-text-secondary"}`}
+          className={`flex-1 py-2 text-xs font-extrabold rounded-pill transition-all ${view === "manage" || view === "edit" ? "bg-primary text-black border-2 border-black shadow-[2px_2px_0px_#000]" : "text-text-secondary"}`}
         >
           Gestionar
         </button>
@@ -123,11 +123,11 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
         <form onSubmit={handleContribute} className="space-y-4">
           {goals.length === 0 ? (
             <div className="text-center py-4">
-              <p className="text-sm text-text-secondary mb-3">No tienes objetivos creados.</p>
+              <p className="text-sm text-text-secondary mb-3 font-bold">No tienes objetivos creados.</p>
               <button 
                 type="button"
                 onClick={() => setView("edit")}
-                className="text-primary font-bold text-sm"
+                className="text-black bg-primary px-4 py-2 rounded-pill neo-border neo-shadow-sm font-bold text-sm neo-button"
               >
                 + Crear primer objetivo
               </button>
@@ -139,7 +139,7 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
                 <select 
                   value={selectedGoalId}
                   onChange={(e) => setSelectedGoalId(e.target.value)}
-                  className="w-full h-12 bg-[#F2F2F2] rounded-xl px-4 text-sm"
+                  className="w-full h-12 bg-white border-2 border-black rounded-lg px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none focus:bg-primary/10 focus:translate-y-[2px] focus:translate-x-[2px] focus:shadow-none transition-all"
                   required
                 >
                   {goals.map(g => (
@@ -154,7 +154,7 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
                   type="number"
                   value={contributionAmount}
                   onChange={(e) => setContributionAmount(e.target.value)}
-                  className="w-full h-12 bg-[#F2F2F2] rounded-xl px-4 text-sm font-bold"
+                  className="w-full h-12 bg-white border-2 border-black rounded-lg px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none focus:bg-primary/10 focus:translate-y-[2px] focus:translate-x-[2px] focus:shadow-none transition-all"
                   placeholder="$ 0"
                   required
                 />
@@ -165,7 +165,7 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
                 <select 
                   value={paidBy}
                   onChange={(e) => setPaidBy(e.target.value)}
-                  className="w-full h-12 bg-[#F2F2F2] rounded-xl px-4 text-sm"
+                  className="w-full h-12 bg-white border-2 border-black rounded-lg px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none focus:bg-primary/10 focus:translate-y-[2px] focus:translate-x-[2px] focus:shadow-none transition-all"
                   required
                 >
                   {activeWallet?.members.map(m => (
@@ -177,7 +177,7 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
               <button 
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full h-12 bg-primary text-text-primary font-bold rounded-pill shadow-fab disabled:opacity-50 mt-2"
+                className="w-full h-12 bg-primary text-black font-extrabold rounded-pill neo-border neo-shadow neo-button disabled:opacity-50 mt-2"
               >
                 {isSubmitting ? "Guardando..." : "Registrar Aporte"}
               </button>
@@ -189,8 +189,8 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
       {(view === "manage" || view === "edit") && (
         <div className="space-y-6">
           {view === "edit" ? (
-            <form onSubmit={handleSaveGoal} className="space-y-4 bg-background/50 p-4 rounded-xl border border-divider">
-              <h4 className="font-bold text-sm text-text-primary">{editingGoal ? "Editar Objetivo" : "Nuevo Objetivo"}</h4>
+            <form onSubmit={handleSaveGoal} className="space-y-4 bg-secondary p-4 rounded-xl neo-border neo-shadow-sm">
+              <h4 className="font-extrabold text-sm text-black">{editingGoal ? "Editar Objetivo" : "Nuevo Objetivo"}</h4>
               
               <div>
                 <label className="block text-[10px] font-bold text-text-secondary uppercase mb-1">Nombre del Objetivo</label>
@@ -198,7 +198,7 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
                   type="text"
                   value={goalName}
                   onChange={(e) => setGoalName(e.target.value)}
-                  className="w-full h-10 bg-white border border-divider rounded-lg px-3 text-sm"
+                  className="w-full h-10 bg-white border-2 border-black rounded-lg px-3 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none"
                   placeholder="Ej: Viaje a la playa"
                   required
                 />
@@ -210,7 +210,7 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
                   type="number"
                   value={targetAmount}
                   onChange={(e) => setTargetAmount(e.target.value)}
-                  className="w-full h-10 bg-white border border-divider rounded-lg px-3 text-sm font-bold"
+                  className="w-full h-10 bg-white border-2 border-black rounded-lg px-3 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none"
                   placeholder="$"
                   required
                 />
@@ -222,7 +222,7 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
                   type="date"
                   value={deadline}
                   onChange={(e) => setDeadline(e.target.value)}
-                  className="w-full h-10 bg-white border border-divider rounded-lg px-3 text-sm"
+                  className="w-full h-10 bg-white border-2 border-black rounded-lg px-3 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none"
                 />
               </div>
 
@@ -230,14 +230,14 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
                 <button 
                   type="button"
                   onClick={() => { setView("manage"); setEditingGoal(null); }}
-                  className="flex-1 h-10 bg-[#F2F2F2] text-text-secondary font-bold text-xs rounded-lg"
+                  className="flex-1 h-10 bg-white text-black font-bold text-xs rounded-lg neo-border neo-shadow-sm neo-button"
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-[2] h-10 bg-primary text-text-primary font-bold text-xs rounded-lg shadow-sm"
+                  className="flex-[2] h-10 bg-primary text-black font-extrabold text-xs rounded-lg neo-border neo-shadow-sm neo-button"
                 >
                   {editingGoal ? "Actualizar" : "Crear"}
                 </button>
@@ -246,7 +246,7 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
           ) : (
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <h4 className="font-bold text-sm text-text-primary">Mis Objetivos</h4>
+                <h4 className="font-extrabold text-sm text-black">Mis Objetivos</h4>
                 <button 
                   onClick={() => {
                     setView("edit");
@@ -255,7 +255,7 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
                     setTargetAmount("");
                     setDeadline("");
                   }}
-                  className="text-xs font-bold text-primary"
+                  className="text-xs font-bold text-black bg-accent px-3 py-1.5 rounded-pill neo-border neo-shadow-sm neo-button"
                 >
                   + Nuevo
                 </button>
@@ -266,10 +266,10 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
               ) : (
                 <div className="space-y-2">
                   {goals.map(g => (
-                    <div key={g.id} className="flex justify-between items-center p-3 bg-white border border-divider rounded-xl">
+                    <div key={g.id} className="flex justify-between items-center p-3 bg-white neo-border neo-shadow-sm rounded-xl mb-2">
                       <div>
-                        <p className="text-sm font-bold text-text-primary">{g.name}</p>
-                        <p className="text-[10px] text-text-secondary">${Number(g.targetAmount).toLocaleString()}</p>
+                        <p className="text-sm font-bold text-black">{g.name}</p>
+                        <p className="text-[10px] text-text-secondary font-bold">${Number(g.targetAmount).toLocaleString()}</p>
                       </div>
                       <div className="flex gap-2">
                         <button 
@@ -280,13 +280,13 @@ export default function GoalForm({ onGoalUpdated, onClose }) {
                             setDeadline(g.deadline || "");
                             setView("edit");
                           }}
-                          className="w-8 h-8 flex items-center justify-center bg-background rounded-full"
+                          className="w-8 h-8 flex items-center justify-center bg-white border-2 border-black shadow-[2px_2px_0px_#000] rounded-full neo-button"
                         >
                           ✏️
                         </button>
                         <button 
                           onClick={() => handleDeleteGoal(g.id)}
-                          className="w-8 h-8 flex items-center justify-center bg-background rounded-full"
+                          className="w-8 h-8 flex items-center justify-center bg-white border-2 border-black shadow-[2px_2px_0px_#000] rounded-full neo-button"
                         >
                           🗑️
                         </button>

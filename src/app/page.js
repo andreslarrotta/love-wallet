@@ -95,7 +95,7 @@ export default function Home() {
         </div>
         <button 
           onClick={() => logout()}
-          className="w-10 h-10 rounded-full border-2 border-primary overflow-hidden shadow-card flex items-center justify-center bg-white text-xl"
+          className="w-10 h-10 rounded-full neo-border overflow-hidden neo-shadow-sm flex items-center justify-center bg-white text-xl neo-button"
         >
           🚪
         </button>
@@ -103,14 +103,14 @@ export default function Home() {
 
       {/* Wallet Toggle */}
       {wallets.length > 1 && (
-        <div className="flex bg-[#F2F2F2] p-1 rounded-pill mb-section-gap">
+        <div className="flex bg-white neo-border neo-shadow-sm p-1 rounded-pill mb-section-gap">
           {wallets.map(wallet => (
             <button
               key={wallet.id}
               onClick={() => switchWallet(wallet.id)}
               className={`flex-1 py-2 text-sm font-bold rounded-pill transition-all ${
                 activeWallet?.id === wallet.id 
-                  ? "bg-white text-primary shadow-sm" 
+                  ? "bg-primary text-black border-2 border-black shadow-[2px_2px_0px_#000]" 
                   : "text-text-secondary"
               }`}
             >
@@ -128,7 +128,7 @@ export default function Home() {
           <h2 className="section-title">Objetivos de Ahorro</h2>
           <button 
             onClick={() => setIsGoalModalOpen(true)}
-            className="text-xs font-bold text-primary flex items-center gap-1 bg-primary/10 px-3 py-1.5 rounded-pill"
+            className="text-xs font-bold text-black flex items-center gap-1 bg-secondary px-3 py-1.5 rounded-pill neo-border neo-shadow-sm neo-button"
           >
             🎯 Configurar / Aportar
           </button>
@@ -146,7 +146,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setShowValues(!showValues)}
-              className="w-8 h-8 flex items-center justify-center bg-[#F2F2F2] rounded-pill text-sm hover:bg-[#E8E8E8] transition-colors"
+              className="w-8 h-8 flex items-center justify-center bg-white neo-border neo-shadow-sm rounded-pill text-sm neo-button"
               title={showValues ? "Ocultar valores" : "Mostrar valores"}
             >
               {showValues ? "👁️" : "🙈"}
@@ -155,7 +155,7 @@ export default function Home() {
               type="month" 
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="text-xs bg-[#F2F2F2] rounded-pill px-2 py-1 outline-none text-text-secondary font-bold h-8"
+              className="text-xs bg-white neo-border neo-shadow-sm rounded-pill px-2 py-1 outline-none text-black font-bold h-8"
             />
           </div>
         </div>
@@ -165,7 +165,7 @@ export default function Home() {
       <section>
         <div className="flex justify-between items-center mb-item-gap">
           <h2 className="section-title">Últimos Gastos</h2>
-          <Link href="/config" className="text-sm font-semibold text-primary flex items-center gap-1">
+          <Link href="/config" className="text-sm font-bold text-black flex items-center gap-1 bg-accent px-3 py-1.5 rounded-pill neo-border neo-shadow-sm neo-button">
             ⚙️ Configurar
           </Link>
         </div>
@@ -175,10 +175,10 @@ export default function Home() {
       {/* Floating Action Button */}
       <button 
         onClick={() => setIsExpenseModalOpen(true)}
-        className="fixed bottom-[88px] right-6 h-14 pl-4 pr-6 bg-primary text-text-primary font-bold rounded-pill shadow-fab flex items-center gap-2 z-40 animate-in slide-in-from-right-full duration-500"
+        className="fixed bottom-[88px] right-6 h-14 pl-4 pr-6 bg-primary text-text-primary font-bold rounded-pill neo-border neo-shadow flex items-center gap-2 z-40 neo-button animate-in slide-in-from-right-full duration-500"
       >
         <span className="text-2xl">+</span>
-        <span className="text-sm">Nuevo Gasto</span>
+        <span className="text-sm uppercase">Nuevo Gasto</span>
       </button>
 
       {/* Expense Modal */}
@@ -211,10 +211,10 @@ export default function Home() {
       </Modal>
 
       {/* Bottom Nav Mockup */}
-      <nav className="fixed bottom-0 left-0 right-0 h-[72px] bg-white border-t border-divider flex items-center justify-around px-4 shadow-nav-bar">
-        <Link href="/" className="bg-primary/20 px-5 py-2 rounded-pill flex items-center gap-2">
-          <span className="text-primary text-xl">🏠</span>
-          <span className="text-xs font-bold text-text-primary">Inicio</span>
+      <nav className="fixed bottom-0 left-0 right-0 h-[72px] bg-white border-t-[3px] border-black flex items-center justify-around px-4 z-40">
+        <Link href="/" className="bg-primary px-5 py-2 rounded-pill flex items-center gap-2 neo-border neo-shadow-sm">
+          <span className="text-xl">🏠</span>
+          <span className="text-xs font-bold text-text-primary uppercase tracking-wider">Inicio</span>
         </Link>
         <Link href="/config" className="text-icon-muted text-xl flex flex-col items-center">
           ⚙️
