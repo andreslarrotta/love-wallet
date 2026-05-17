@@ -242,7 +242,10 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose, in
           })()
         )}
 
-        <div className="flex gap-3 mt-2">
+        <div 
+          className="sticky bottom-[calc(-1.5rem)] bg-surface pt-4 pb-6 z-20 flex gap-3"
+          style={{ margin: "16px -1.5rem -1.5rem -1.5rem", padding: "16px 1.5rem 1.5rem 1.5rem", borderTop: "2px solid rgba(0,0,0,0.05)" }}
+        >
           {onClose && (
             <button 
               type="button"
@@ -257,7 +260,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose, in
             disabled={isSubmitting}
             className={`flex-[2] h-12 bg-primary text-black font-extrabold rounded-pill neo-border neo-shadow neo-button disabled:opacity-50`}
           >
-            {isSubmitting ? "Guardando..." : (initialData ? "Actualizar Gasto" : "Guardar Gasto")}
+            {isSubmitting ? "Guardando..." : (initialData ? "Actualizar" : "Guardar")}
           </button>
         </div>
       </form>

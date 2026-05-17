@@ -31,17 +31,18 @@ export default function Home() {
   const container = useRef();
 
   useGSAP(() => {
-    gsap.from(".gsap-header", { y: -50, opacity: 0, duration: 0.5, ease: "back.out(1.7)" });
+    gsap.from(".gsap-header", { y: -50, opacity: 0, duration: 0.5, ease: "back.out(1.7)", clearProps: "all" });
     gsap.from(".gsap-section", { 
       y: 30, 
       opacity: 0, 
       duration: 0.5, 
       stagger: 0.15, 
       ease: "power2.out",
-      delay: 0.2
+      delay: 0.2,
+      clearProps: "all"
     });
-    gsap.from(".gsap-fab", { scale: 0, opacity: 0, duration: 0.5, ease: "back.out(2)", delay: 0.8 });
-    gsap.from(".gsap-nav", { y: 100, opacity: 0, duration: 0.5, ease: "power2.out", delay: 0.5 });
+    gsap.from(".gsap-fab", { scale: 0, opacity: 0, duration: 0.5, ease: "back.out(2)", delay: 0.8, clearProps: "all" });
+    gsap.from(".gsap-nav", { y: 100, opacity: 0, duration: 0.5, ease: "power2.out", delay: 0.5, clearProps: "all" });
   }, { scope: container });
 
   useEffect(() => {
