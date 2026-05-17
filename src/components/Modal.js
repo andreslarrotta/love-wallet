@@ -25,8 +25,8 @@ export default function Modal({ isOpen, onClose, title, children }) {
       />
       
       {/* Modal Content */}
-      <div className="relative w-full max-w-lg bg-background rounded-t-[32px] sm:rounded-[32px] border-t-4 border-l-4 border-r-4 sm:border-b-4 border-black shadow-[0px_-4px_0px_#000] sm:shadow-[8px_8px_0px_#000] overflow-hidden animate-in slide-in-from-bottom-full duration-300">
-        <div className="p-6">
+      <div className="relative w-full max-w-lg bg-background rounded-t-[32px] sm:rounded-[32px] border-t-4 border-l-4 border-r-4 sm:border-b-4 border-black shadow-[0px_-4px_0px_#000] sm:shadow-[8px_8px_0px_#000] flex flex-col max-h-[90vh] sm:max-h-[85vh] animate-in slide-in-from-bottom-full duration-300">
+        <div className="p-6 pb-0 flex-shrink-0">
           <div className="flex justify-between items-center mb-6 border-b-4 border-black pb-4">
             <h2 className="text-xl font-extrabold text-black uppercase">{title}</h2>
             <button 
@@ -36,6 +36,8 @@ export default function Modal({ isOpen, onClose, title, children }) {
               ✕
             </button>
           </div>
+        </div>
+        <div className="px-6 pb-6 overflow-y-auto flex-1">
           {children}
         </div>
       </div>

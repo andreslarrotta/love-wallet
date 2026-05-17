@@ -1,18 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { addExpense, getCategories, getExpenses } from "@/services/db";
+import { addExpense, getCategories, getExpenses, updateExpense } from "@/services/db";
 import { useAuth } from "@/context/AuthContext";
 import { useWallet } from "@/context/WalletContext";
 
-export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) {
+export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose, initialData = null }) {
   const { user } = useAuth();
   const { activeWallet } = useWallet();
-  const [product, setProduct] = useState("");
-  const [value, setValue] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [paidBy, setPaidBy] = useState("");
+  const [product, setProduct] = useState(initialData?.product || "");
+  const [value, setValue] = useState(initialData?.value || "");
+  const [categoryId, setCategoryId] = useState(initialData?.categoryId || "");
+  const [paidBy, setPaidBy] = useState(initialData?.paidBy || "");
+  const [incomeSourceId, setIncomeSourceId] = useState(initialData?.incomeSourceId || "");
   const [date, setDate] = useState(() => {
+    if (initialData?.createdAt) {
+      const d = initialData.createdAt.toDate ? initialData.createdAt.toDate() : new Date(initialData.createdAt);
+      return d.toISOString().split('T')[0];
+    }
     const today = new Date();
     return today.toISOString().split('T')[0];
   });
@@ -20,6 +25,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
 
   const [categories, setCategories] = useState([]);
   const [spentByMember, setSpentByMember] = useState({});
+  const [spentBySource, setSpentBySource] = useState({});
 
   async function loadSelectData() {
     const [cats, expData] = await Promise.all([
@@ -38,11 +44,17 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
       : expData;
 
     const spentMap = {};
+    const sourceSpentMap = {};
     filteredExpenses.forEach(expense => {
       const email = expense.paidBy || expense.userEmail || activeWallet.members[0];
       spentMap[email] = (spentMap[email] || 0) + (Number(expense.value) || 0);
+      
+      if (expense.incomeSourceId) {
+        sourceSpentMap[expense.incomeSourceId] = (sourceSpentMap[expense.incomeSourceId] || 0) + (Number(expense.value) || 0);
+      }
     });
     setSpentByMember(spentMap);
+    setSpentBySource(sourceSpentMap);
   }
 
   useEffect(() => {
@@ -57,33 +69,41 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
 
     setIsSubmitting(true);
     try {
-      await addExpense(activeWallet.id, {
+      const expenseData = {
         product,
         value: Number(value),
         categoryId,
         paidBy,
+        incomeSourceId: incomeSourceId || null,
         userEmail: user.email,
         createdAt: new Date(date + "T12:00:00")
-      });
+      };
 
-      // Send notification to other members
-      fetch("/api/notify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          walletId: activeWallet.id,
-          amount: value,
-          product: product,
-          userName: user.displayName || user.email,
-          excludeEmail: user.email
-        })
-      }).catch(err => console.error("Notification error:", err));
+      if (initialData) {
+        await updateExpense(initialData.id, expenseData);
+      } else {
+        await addExpense(activeWallet.id, expenseData);
+
+        // Send notification to other members
+        fetch("/api/notify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            walletId: activeWallet.id,
+            amount: value,
+            product: product,
+            userName: user.displayName || user.email,
+            excludeEmail: user.email
+          })
+        }).catch(err => console.error("Notification error:", err));
+      }
 
       setProduct("");
 
       setValue("");
       setCategoryId("");
       setPaidBy("");
+      setIncomeSourceId("");
       await loadSelectData();
       if (onExpenseAdded) onExpenseAdded();
       if (onClose) onClose();
@@ -96,7 +116,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
 
   return (
     <div className="bg-surface p-card-p rounded-card neo-border neo-shadow">
-      <h3 className="section-title mb-4">Nuevo Gasto</h3>
+      <h3 className="section-title mb-4">{initialData ? "Editar Gasto" : "Nuevo Gasto"}</h3>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label className="block text-xs font-semibold text-text-secondary uppercase mb-1">Producto / Servicio</label>
@@ -165,10 +185,27 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
           </div>
         </div>
 
+        {paidBy && activeWallet?.incomeSources && activeWallet.incomeSources.some(src => src.owner === paidBy) && (
+          <div>
+            <label className="block text-xs font-semibold text-text-secondary uppercase mb-1">Descontar de (Ingreso)</label>
+            <select 
+              value={incomeSourceId} 
+              onChange={(e) => setIncomeSourceId(e.target.value)}
+              className="w-full h-12 bg-white border-2 border-black rounded-lg px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none focus:bg-primary/10 focus:translate-y-[2px] focus:translate-x-[2px] focus:shadow-none transition-all appearance-none"
+            >
+              <option value="">General (No especificado)</option>
+              {activeWallet.incomeSources.filter(src => src.owner === paidBy).map(src => (
+                <option key={src.id} value={src.id}>{src.name} (${src.amount.toLocaleString()})</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {paidBy && (
           (() => {
-            const income = Number(activeWallet?.incomes?.[paidBy]) || 0;
-            const spent = spentByMember[paidBy] || 0;
+            const selectedSource = incomeSourceId ? activeWallet?.incomeSources?.find(s => s.id === incomeSourceId) : null;
+            const income = selectedSource ? Number(selectedSource.amount) : (Number(activeWallet?.incomes?.[paidBy]) || 0);
+            const spent = selectedSource ? (spentBySource[incomeSourceId] || 0) : (spentByMember[paidBy] || 0);
             const projected = spent + (Number(value) || 0);
             const percentage = income > 0 ? Math.min((projected / income) * 100, 100) : 0;
             const formatCurrency = (v) => `$${Number(v || 0).toLocaleString()}`;
@@ -187,7 +224,9 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
             return (
               <div className="bg-secondary p-3 rounded-card neo-border neo-shadow-sm mt-4">
                 <div className="flex justify-between items-center">
-                  <p className="text-xs font-bold text-black uppercase">Consumo de ingreso</p>
+                  <p className="text-xs font-bold text-black uppercase">
+                    {selectedSource ? `Consumo de: ${selectedSource.name}` : "Consumo de ingreso total"}
+                  </p>
                   <p className="text-xs text-black font-extrabold">{paidBy.split("@")[0]}</p>
                 </div>
                 <div className="flex justify-between items-center mt-1">
@@ -218,7 +257,7 @@ export default function ExpenseForm({ onExpenseAdded, selectedMonth, onClose }) 
             disabled={isSubmitting}
             className={`flex-[2] h-12 bg-primary text-black font-extrabold rounded-pill neo-border neo-shadow neo-button disabled:opacity-50`}
           >
-            {isSubmitting ? "Guardando..." : "Guardar Gasto"}
+            {isSubmitting ? "Guardando..." : (initialData ? "Actualizar Gasto" : "Guardar Gasto")}
           </button>
         </div>
       </form>

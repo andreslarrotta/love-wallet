@@ -30,12 +30,30 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
       : expData;
 
     const spentByCategoryAndUser = {};
-    const totals = {};
+    const sourceTotals = {};
+    const incomeSources = activeWallet.incomeSources || [];
     
-    // Initialize totals for each member
-    activeWallet.members.forEach(member => {
-      totals[member] = { spent: 0, income: Number(activeWallet.incomes?.[member]) || 0 };
-    });
+    if (incomeSources.length > 0) {
+      incomeSources.forEach(source => {
+        sourceTotals[source.id] = { 
+          id: source.id,
+          name: source.name,
+          owner: source.owner,
+          spent: 0, 
+          income: Number(source.amount) || 0 
+        };
+      });
+    } else {
+      activeWallet.members.forEach(member => {
+        sourceTotals[member] = { 
+          id: member,
+          name: "Total Mensual",
+          owner: member,
+          spent: 0, 
+          income: Number(activeWallet.incomes?.[member]) || 0 
+        };
+      });
+    }
 
     filteredExpenses.forEach(expense => {
       const catId = expense.categoryId;
@@ -47,8 +65,26 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
         spentByCategoryAndUser[catId][email] += expense.value;
       }
 
-      if (totals[email]) {
-        totals[email].spent += expense.value;
+      if (incomeSources.length > 0) {
+        if (expense.incomeSourceId && sourceTotals[expense.incomeSourceId]) {
+          sourceTotals[expense.incomeSourceId].spent += expense.value;
+        } else {
+          const genId = `general-${email}`;
+          if (!sourceTotals[genId]) {
+            sourceTotals[genId] = {
+              id: genId,
+              name: "Otros Gastos (Sin asignar)",
+              owner: email,
+              spent: 0,
+              income: 0
+            };
+          }
+          sourceTotals[genId].spent += expense.value;
+        }
+      } else {
+        if (sourceTotals[email]) {
+          sourceTotals[email].spent += expense.value;
+        }
       }
     });
 
@@ -85,19 +121,23 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
       };
     });
 
-    const totalSummarized = activeWallet.members.map(member => {
-      const data = totals[member];
+    const totalSummarized = Object.values(sourceTotals).map(data => {
       const remaining = data.income - data.spent;
-      const percentage = data.income > 0 ? Math.min((data.spent / data.income) * 100, 100) : 0;
-      const isOver = data.income > 0 ? data.spent > data.income : false;
+      let percentage = 0;
+      if (data.income > 0) {
+        percentage = Math.min((data.spent / data.income) * 100, 100);
+      } else if (data.spent > 0) {
+        percentage = 100;
+      }
+      const isOver = data.income > 0 ? data.spent > data.income : data.spent > 0;
+      
       return {
-        email: member,
         ...data,
         remaining,
         percentage,
         isOver
       };
-    });
+    }).sort((a, b) => b.income - a.income);
 
     setBudgetData(summary);
     setTotalSummary(totalSummarized);
@@ -132,45 +172,52 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
         <div className="bg-primary p-card-p rounded-card neo-border neo-shadow mb-6">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h3 className="text-sm font-extrabold text-black uppercase">Consumo Total de Salario</h3>
-              <p className="text-[10px] text-black font-medium mt-1">Total gastado este mes frente al ingreso configurado.</p>
+              <h3 className="text-sm font-extrabold text-black uppercase">Consumo por Ingreso</h3>
+              <p className="text-[10px] text-black font-medium mt-1">Total gastado este mes descontado de cada fuente.</p>
             </div>
             <Link href="/config" className="text-[10px] font-bold text-black uppercase tracking-wider bg-white px-2 py-1 rounded-pill border-2 border-black shadow-[2px_2px_0px_#000] neo-button">
-              Configurar
+              Configurar Ingresos
             </Link>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {totalSummary.map(data => (
-              <div key={`${data.email}-total`} className="bg-white p-3 rounded-xl neo-border neo-shadow-sm">
-                <div className="flex justify-between items-end mb-2">
-                  <span className="text-xs font-bold text-text-secondary truncate pr-2">
-                    {data.email.split("@")[0]}
-                  </span>
-                  <span className={`text-xs font-bold ${data.isOver ? "text-red-600" : "text-black"}`}>
-                    {formatCurrency(data.spent)} / {formatCurrency(data.income)}
-                  </span>
-                </div>
-
-                <div className="w-full bg-white border-2 border-black rounded-full h-4 overflow-hidden shadow-[2px_2px_0px_#000]">
-                  <div 
-                    className={`h-full border-r-2 border-black transition-all duration-500 ${getProgressColor(data.percentage)}`} 
-                    style={{ width: `${data.percentage}%` }}
-                  ></div>
-                </div>
-
-                <div className="flex justify-between mt-2">
-                  <span className="text-[10px] font-medium text-text-tertiary">
-                    {Math.round(data.percentage)}% usado
-                  </span>
-                  {data.income > 0 && (
-                    <span className={`text-[10px] font-bold ${data.isOver ? "text-red-500" : "text-green-600"}`}>
-                      {data.isOver 
-                        ? `Excedido por ${formatCurrency(Math.abs(data.remaining))}` 
-                        : `Libre: ${formatCurrency(data.remaining)}`
-                      }
+              <div key={data.id} className="bg-white p-3 rounded-xl neo-border neo-shadow-sm flex flex-col justify-between">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <span className="text-xs font-extrabold text-black uppercase block truncate pr-2">
+                      {data.name}
                     </span>
-                  )}
+                    <span className="text-[10px] font-bold text-text-secondary">
+                      {data.owner?.split("@")[0] || ""}
+                    </span>
+                  </div>
+                  <span className={`text-xs font-bold ${data.isOver ? "text-red-600" : "text-black"}`}>
+                    {formatCurrency(data.spent)} {data.income > 0 && `/ ${formatCurrency(data.income)}`}
+                  </span>
+                </div>
+
+                <div>
+                  <div className="w-full bg-white border-2 border-black rounded-full h-4 overflow-hidden shadow-[2px_2px_0px_#000]">
+                    <div 
+                      className={`h-full border-r-2 border-black transition-all duration-500 ${getProgressColor(data.percentage)}`} 
+                      style={{ width: `${data.percentage}%` }}
+                    ></div>
+                  </div>
+
+                  <div className="flex justify-between mt-2">
+                    <span className="text-[10px] font-medium text-text-tertiary">
+                      {Math.round(data.percentage)}% usado
+                    </span>
+                    {data.income > 0 && (
+                      <span className={`text-[10px] font-bold ${data.isOver ? "text-red-500" : "text-green-600"}`}>
+                        {data.isOver 
+                          ? `Excedido por ${formatCurrency(Math.abs(data.remaining))}` 
+                          : `Libre: ${formatCurrency(data.remaining)}`
+                        }
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

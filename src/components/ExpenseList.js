@@ -4,12 +4,16 @@ import { useState, useEffect } from "react";
 import { getExpenses, getCategories, deleteExpense } from "@/services/db";
 import { useWallet } from "@/context/WalletContext";
 import Loading from "@/components/Loading";
+import Modal from "@/components/Modal";
+import ExpenseForm from "@/components/ExpenseForm";
 
-export default function ExpenseList({ refreshTrigger, selectedMonth, showValues = true }) {
+export default function ExpenseList({ refreshTrigger, selectedMonth, showValues = true, onExpenseChanged }) {
   const { activeWallet } = useWallet();
   const [expenses, setExpenses] = useState([]);
   const [categories, setCategories] = useState({});
   const [loading, setLoading] = useState(true);
+
+  const [editingExpense, setEditingExpense] = useState(null);
 
   // Local state to force reload after delete
   const [localRefresh, setLocalRefresh] = useState(0);
@@ -50,6 +54,7 @@ export default function ExpenseList({ refreshTrigger, selectedMonth, showValues 
     if (confirm("¿Estás seguro de que deseas eliminar este gasto?")) {
       await deleteExpense(id);
       setLocalRefresh(prev => prev + 1);
+      if (onExpenseChanged) onExpenseChanged();
     }
   };
 
@@ -96,17 +101,44 @@ export default function ExpenseList({ refreshTrigger, selectedMonth, showValues 
                     {expense.createdAt?.toDate().toLocaleDateString()}
                   </p>
                 </div>
-                <button 
-                  onClick={() => handleDelete(expense.id)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-accent border-2 border-black shadow-[2px_2px_0px_#000] text-black neo-button transition-colors"
-                  title="Eliminar gasto"
-                >
-                  🗑️
-                </button>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => setEditingExpense(expense)}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-white border-2 border-black shadow-[2px_2px_0px_#000] text-black neo-button transition-colors"
+                    title="Editar gasto"
+                  >
+                    ✏️
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(expense.id)}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-accent border-2 border-black shadow-[2px_2px_0px_#000] text-black neo-button transition-colors"
+                    title="Eliminar gasto"
+                  >
+                    🗑️
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {editingExpense && (
+        <Modal 
+          isOpen={true} 
+          onClose={() => setEditingExpense(null)}
+          title="Editar Gasto"
+        >
+          <ExpenseForm 
+            onClose={() => setEditingExpense(null)} 
+            onExpenseAdded={() => {
+              setEditingExpense(null);
+              setLocalRefresh(prev => prev + 1);
+              if (onExpenseChanged) onExpenseChanged();
+            }}
+            initialData={editingExpense} 
+          />
+        </Modal>
       )}
     </div>
   );

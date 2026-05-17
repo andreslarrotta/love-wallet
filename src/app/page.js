@@ -169,7 +169,12 @@ export default function Home() {
             ⚙️ Configurar
           </Link>
         </div>
-        <ExpenseList refreshTrigger={refreshKey} selectedMonth={selectedMonth} showValues={showValues} />
+        <ExpenseList 
+          refreshTrigger={refreshKey} 
+          selectedMonth={selectedMonth} 
+          showValues={showValues} 
+          onExpenseChanged={() => setRefreshKey(k => k + 1)}
+        />
       </section>
 
       {/* Floating Action Button */}

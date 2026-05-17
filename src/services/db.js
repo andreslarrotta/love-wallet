@@ -48,6 +48,10 @@ export const updateWalletIncomes = async (walletId, incomes) => {
   return await updateDoc(doc(db, "wallets", walletId), { incomes, updatedAt: new Date() });
 };
 
+export const updateWalletIncomeSources = async (walletId, incomeSources) => {
+  return await updateDoc(doc(db, "wallets", walletId), { incomeSources, updatedAt: new Date() });
+};
+
 // --- Categories ---
 export const addCategory = async (walletId, categoryData) => {
   return await addDoc(collection(db, "categories"), {
@@ -116,6 +120,10 @@ export const getExpenses = async (walletId) => {
   );
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const updateExpense = async (id, expenseData) => {
+  return await updateDoc(doc(db, "expenses", id), expenseData);
 };
 
 export const deleteExpense = async (id) => {

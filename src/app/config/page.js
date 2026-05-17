@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useWallet } from "@/context/WalletContext";
 import { useRouter } from "next/navigation";
-import { addCategory, getCategories, deleteCategory, updateCategory, createSharedWallet, updateWalletIncomes } from "@/services/db";
+import { addCategory, getCategories, deleteCategory, updateCategory, createSharedWallet, updateWalletIncomes, updateWalletIncomeSources } from "@/services/db";
 import Link from "next/link";
 
 export default function ConfigPage() {
@@ -21,7 +21,13 @@ export default function ConfigPage() {
   const [editingCategoryId, setEditingCategoryId] = useState(null);
 
   const [partnerEmail, setPartnerEmail] = useState("");
-  const [incomeInputs, setIncomeInputs] = useState({});
+  
+  // Income Sources
+  const [incomeSources, setIncomeSources] = useState([]);
+  const [editingIncomeId, setEditingIncomeId] = useState(null);
+  const [incomeName, setIncomeName] = useState("");
+  const [incomeAmount, setIncomeAmount] = useState("");
+  const [incomeOwner, setIncomeOwner] = useState("");
 
   const loading = authLoading || walletLoading;
 
@@ -35,11 +41,8 @@ export default function ConfigPage() {
     });
     setNewCatBudgets(initialBudgets);
 
-    const initialIncomes = {};
-    wallet.members.forEach(member => {
-      initialIncomes[member] = wallet.incomes?.[member] ?? "";
-    });
-    setIncomeInputs(initialIncomes);
+    const initialSources = wallet.incomeSources || [];
+    setIncomeSources(initialSources);
   }
 
   useEffect(() => {
@@ -68,20 +71,74 @@ export default function ConfigPage() {
     setNewCatBudgets(prev => ({ ...prev, [email]: value }));
   };
 
-  const handleIncomeChange = (email, value) => {
-    setIncomeInputs(prev => ({ ...prev, [email]: value }));
+  const handleSaveIncomeSource = async (e) => {
+    e.preventDefault();
+    if (!activeWallet || !incomeName || !incomeAmount || !incomeOwner) return;
+
+    let updatedSources = [...incomeSources];
+    
+    if (editingIncomeId) {
+      updatedSources = updatedSources.map(inc => 
+        inc.id === editingIncomeId 
+          ? { ...inc, name: incomeName, amount: Number(incomeAmount), owner: incomeOwner }
+          : inc
+      );
+    } else {
+      updatedSources.push({
+        id: Date.now().toString(),
+        name: incomeName,
+        amount: Number(incomeAmount),
+        owner: incomeOwner
+      });
+    }
+
+    const newIncomesDict = {};
+    activeWallet.members.forEach(m => newIncomesDict[m] = 0);
+    updatedSources.forEach(inc => {
+      if (newIncomesDict[inc.owner] !== undefined) {
+        newIncomesDict[inc.owner] += inc.amount;
+      }
+    });
+
+    await updateWalletIncomeSources(activeWallet.id, updatedSources);
+    await updateWalletIncomes(activeWallet.id, newIncomesDict);
+    
+    setIncomeSources(updatedSources);
+    setIncomeName("");
+    setIncomeAmount("");
+    setIncomeOwner("");
+    setEditingIncomeId(null);
+    loadWallets();
   };
 
-  const handleSaveIncomes = async (e) => {
-    e.preventDefault();
-    if (!activeWallet) return;
-    const incomesToSave = {};
-    activeWallet.members.forEach(member => {
-      incomesToSave[member] = Number(incomeInputs[member]) || 0;
+  const handleEditIncome = (inc) => {
+    setEditingIncomeId(inc.id);
+    setIncomeName(inc.name);
+    setIncomeAmount(inc.amount);
+    setIncomeOwner(inc.owner);
+  };
+
+  const handleCancelEditIncome = () => {
+    setEditingIncomeId(null);
+    setIncomeName("");
+    setIncomeAmount("");
+    setIncomeOwner("");
+  };
+
+  const handleDeleteIncome = async (id) => {
+    const updatedSources = incomeSources.filter(inc => inc.id !== id);
+    const newIncomesDict = {};
+    activeWallet.members.forEach(m => newIncomesDict[m] = 0);
+    updatedSources.forEach(inc => {
+      if (newIncomesDict[inc.owner] !== undefined) {
+        newIncomesDict[inc.owner] += inc.amount;
+      }
     });
-    await updateWalletIncomes(activeWallet.id, incomesToSave);
+
+    await updateWalletIncomeSources(activeWallet.id, updatedSources);
+    await updateWalletIncomes(activeWallet.id, newIncomesDict);
+    setIncomeSources(updatedSources);
     loadWallets();
-    alert("Ingresos actualizados");
   };
 
   const handleSaveCategory = async (e) => {
@@ -208,30 +265,78 @@ export default function ConfigPage() {
                 <li key={member}>• {member} {member === user?.email ? "(Tú)" : ""}</li>
               ))}
             </ul>
-
-            <div className="mt-4 pt-4 border-t-2 border-black">
-              <h3 className="text-sm font-extrabold text-black uppercase mb-2">Ingresos mensuales</h3>
-              <form onSubmit={handleSaveIncomes} className="space-y-2">
-                {activeWallet?.members.map(member => (
-                  <div key={member} className="flex items-center gap-2">
-                    <span className="text-xs text-black font-bold w-1/2 truncate">{member}</span>
-                    <input
-                      type="number"
-                      placeholder="$"
-                      value={incomeInputs[member] ?? ""}
-                      onChange={(e) => handleIncomeChange(member, e.target.value)}
-                      className="flex-1 h-10 bg-white border-2 border-black rounded-search-bar px-4 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none focus:bg-primary/10 focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-none transition-all"
-                    />
-                  </div>
-                ))}
-                <button type="submit" className="w-full h-11 bg-primary text-black font-extrabold rounded-pill border-2 border-black shadow-[2px_2px_0px_#000] mt-2 neo-button">
-                  Guardar ingresos
-                </button>
-              </form>
-            </div>
           </div>
         </section>
       )}
+
+      {/* Incomes Section */}
+      <section className="mb-section-gap">
+        <h2 className="section-title mb-4">Fuentes de Ingresos</h2>
+        <div className="p-card-p bg-secondary rounded-card neo-border neo-shadow-sm">
+          <form onSubmit={handleSaveIncomeSource} className="bg-white p-3 rounded-xl neo-border neo-shadow-sm mb-4">
+            <h4 className="text-xs font-bold text-black mb-2">{editingIncomeId ? "Editar Ingreso" : "Nuevo Ingreso"}</h4>
+            
+            <div className="space-y-2 mb-3">
+              <input 
+                type="text" 
+                placeholder="Nombre (ej. Salario)" 
+                value={incomeName}
+                onChange={(e) => setIncomeName(e.target.value)}
+                className="w-full h-10 bg-white border-2 border-black rounded-search-bar px-3 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none"
+                required
+              />
+              <div className="flex gap-2">
+                <input 
+                  type="number" 
+                  placeholder="$ Monto" 
+                  value={incomeAmount}
+                  onChange={(e) => setIncomeAmount(e.target.value)}
+                  className="flex-1 h-10 bg-white border-2 border-black rounded-search-bar px-3 text-sm font-bold shadow-[2px_2px_0px_#000] outline-none"
+                  required
+                />
+                <select
+                  value={incomeOwner}
+                  onChange={(e) => setIncomeOwner(e.target.value)}
+                  className="flex-1 h-10 bg-white border-2 border-black rounded-search-bar px-2 text-xs font-bold shadow-[2px_2px_0px_#000] outline-none appearance-none"
+                  required
+                >
+                  <option value="">¿De quién?</option>
+                  {activeWallet?.members.map(m => (
+                    <option key={m} value={m}>{m.split("@")[0]}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button type="submit" className="flex-1 h-10 bg-primary text-black font-extrabold rounded-pill border-2 border-black shadow-[2px_2px_0px_#000] text-xs neo-button">
+                {editingIncomeId ? "Actualizar" : "Añadir"}
+              </button>
+              {editingIncomeId && (
+                <button type="button" onClick={handleCancelEditIncome} className="h-10 px-4 bg-white text-black font-bold rounded-pill border-2 border-black shadow-[2px_2px_0px_#000] text-xs neo-button">
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </form>
+
+          <div className="space-y-2">
+            {incomeSources.map(inc => (
+              <div key={inc.id} className="flex justify-between items-center p-2 bg-white border-2 border-black rounded-xl">
+                <div>
+                  <p className="text-sm font-bold text-black">{inc.name}</p>
+                  <p className="text-[10px] text-text-secondary font-bold">{inc.owner.split("@")[0]} - ${inc.amount.toLocaleString()}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => handleEditIncome(inc)} className="w-8 h-8 flex items-center justify-center bg-accent border-2 border-black shadow-[2px_2px_0px_#000] rounded-full text-xs neo-button">✏️</button>
+                  <button type="button" onClick={() => handleDeleteIncome(inc.id)} className="w-8 h-8 flex items-center justify-center bg-white border-2 border-black shadow-[2px_2px_0px_#000] rounded-full text-xs neo-button">🗑️</button>
+                </div>
+              </div>
+            ))}
+            {incomeSources.length === 0 && <p className="text-xs text-black font-bold text-center py-2">No hay ingresos registrados.</p>}
+          </div>
+        </div>
+      </section>
 
       {/* Categories Section */}
       <section className="mb-section-gap">
