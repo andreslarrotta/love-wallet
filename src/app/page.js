@@ -52,7 +52,7 @@ export default function Home() {
 
       registerSW();
     }
-    
+
     // Request Notification permission
     if (typeof window !== 'undefined' && 'Notification' in window) {
       if (Notification.permission === 'default') {
@@ -65,7 +65,7 @@ export default function Home() {
     // This is now handled by the backend broadcast, but we can keep it for local testing if needed
     // or remove it to avoid duplicate notifications for the sender.
   };
-  
+
   // Default to current month YYYY-MM
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const today = new Date();
@@ -93,7 +93,7 @@ export default function Home() {
             Tus <span className="hero-highlight">Gastos</span>
           </h1>
         </div>
-        <button 
+        <button
           onClick={() => logout()}
           className="w-10 h-10 rounded-full neo-border overflow-hidden neo-shadow-sm flex items-center justify-center bg-white text-xl neo-button"
         >
@@ -108,11 +108,10 @@ export default function Home() {
             <button
               key={wallet.id}
               onClick={() => switchWallet(wallet.id)}
-              className={`flex-1 py-2 text-sm font-bold rounded-pill transition-all ${
-                activeWallet?.id === wallet.id 
-                  ? "bg-primary text-black border-2 border-black shadow-[2px_2px_0px_#000]" 
-                  : "text-text-secondary"
-              }`}
+              className={`flex-1 py-2 text-sm font-bold rounded-pill transition-all ${activeWallet?.id === wallet.id
+                ? "bg-primary text-black border-2 border-black shadow-[2px_2px_0px_#000]"
+                : "text-text-secondary"
+                }`}
             >
               {wallet.name}
             </button>
@@ -126,17 +125,17 @@ export default function Home() {
       <section className="mb-section-gap">
         <div className="flex justify-between items-center mb-4">
           <h2 className="section-title">Objetivos de Ahorro</h2>
-          <button 
+          <button
             onClick={() => setIsGoalModalOpen(true)}
             className="text-xs font-bold text-black flex items-center gap-1 bg-secondary px-3 py-1.5 rounded-pill neo-border neo-shadow-sm neo-button"
           >
             🎯 Configurar / Aportar
           </button>
         </div>
-        <GoalSummary 
-          refreshTrigger={refreshKey} 
-          selectedMonth={selectedMonth} 
-          showValues={showValues} 
+        <GoalSummary
+          refreshTrigger={refreshKey}
+          selectedMonth={selectedMonth}
+          showValues={showValues}
         />
       </section>
 
@@ -144,15 +143,15 @@ export default function Home() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="section-title">Presupuesto</h2>
           <div className="flex items-center gap-2">
-            <button 
+            <button
               onClick={() => setShowValues(!showValues)}
               className="w-8 h-8 flex items-center justify-center bg-white neo-border neo-shadow-sm rounded-pill text-sm neo-button"
               title={showValues ? "Ocultar valores" : "Mostrar valores"}
             >
               {showValues ? "👁️" : "🙈"}
             </button>
-            <input 
-              type="month" 
+            <input
+              type="month"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
               className="text-xs bg-white neo-border neo-shadow-sm rounded-pill px-2 py-1 outline-none text-black font-bold h-8"
@@ -169,16 +168,16 @@ export default function Home() {
             ⚙️ Configurar
           </Link>
         </div>
-        <ExpenseList 
-          refreshTrigger={refreshKey} 
-          selectedMonth={selectedMonth} 
-          showValues={showValues} 
+        <ExpenseList
+          refreshTrigger={refreshKey}
+          selectedMonth={selectedMonth}
+          showValues={showValues}
           onExpenseChanged={() => setRefreshKey(k => k + 1)}
         />
       </section>
 
       {/* Floating Action Button */}
-      <button 
+      <button
         onClick={() => setIsExpenseModalOpen(true)}
         className="fixed bottom-[88px] right-6 h-14 pl-4 pr-6 bg-primary text-text-primary font-bold rounded-pill neo-border neo-shadow flex items-center gap-2 z-40 neo-button animate-in slide-in-from-right-full duration-500"
       >
@@ -187,29 +186,29 @@ export default function Home() {
       </button>
 
       {/* Expense Modal */}
-      <Modal 
-        isOpen={isExpenseModalOpen} 
+      <Modal
+        isOpen={isExpenseModalOpen}
         onClose={() => setIsExpenseModalOpen(false)}
         title="Agregar Nuevo Gasto"
       >
-        <ExpenseForm 
-          selectedMonth={selectedMonth} 
-          onExpenseAdded={() => { 
-            setRefreshKey(k => k + 1); 
-            triggerExpenseNotification(); 
+        <ExpenseForm
+          selectedMonth={selectedMonth}
+          onExpenseAdded={() => {
+            setRefreshKey(k => k + 1);
+            triggerExpenseNotification();
             setIsExpenseModalOpen(false);
-          }} 
+          }}
           onClose={() => setIsExpenseModalOpen(false)}
         />
       </Modal>
 
       {/* Goal Modal */}
-      <Modal 
-        isOpen={isGoalModalOpen} 
+      <Modal
+        isOpen={isGoalModalOpen}
         onClose={() => setIsGoalModalOpen(false)}
         title="Mis Objetivos de Ahorro"
       >
-        <GoalForm 
+        <GoalForm
           onGoalUpdated={() => setRefreshKey(k => k + 1)}
           onClose={() => setIsGoalModalOpen(false)}
         />
@@ -218,7 +217,12 @@ export default function Home() {
       {/* Bottom Nav Mockup */}
       <nav className="fixed bottom-0 left-0 right-0 h-[72px] bg-white border-t-[3px] border-black flex items-center justify-around px-4 z-40">
         <Link href="/" className="bg-primary px-5 py-2 rounded-pill flex items-center gap-2 neo-border neo-shadow-sm">
-          <span className="text-xl">🏠</span>
+          <span className="text-xl">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#010002" width="24" height="24">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="#010002" stroke-width="2"></path>
+              <polyline points="9 22 9 12 15 12 15 22" stroke="#010002" stroke-width="2"></polyline>
+            </svg>
+          </span>
           <span className="text-xs font-bold text-text-primary uppercase tracking-wider">Inicio</span>
         </Link>
         <Link href="/config" className="text-icon-muted text-xl flex flex-col items-center">
