@@ -11,6 +11,7 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
   const [budgetData, setBudgetData] = useState([]);
   const [totalSummary, setTotalSummary] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [columns, setColumns] = useState(1);
 
   async function calculateBudgets() {
     setLoading(true);
@@ -185,49 +186,69 @@ export default function BudgetSummary({ refreshTrigger, selectedMonth, showValue
           </Link>
         </div>
       ) : (
-        <div className="bg-surface p-card-p rounded-card neo-border neo-shadow space-y-6">
-        {budgetData.map(cat => (
-          <div key={cat.id} className="border-b-4 border-black pb-4 last:border-0 last:pb-0">
-            <h3 className="font-extrabold text-black text-xl mb-3 uppercase">{cat.name}</h3>
-            
-            <div className="space-y-4">
-              {cat.membersData.map(data => (
-                <div key={data.email}>
-                  <div className="flex justify-between items-end mb-1">
-                    <span className="text-xs font-semibold text-text-secondary flex items-center gap-1 w-1/2 truncate">
-                      {data.email.split("@")[0]}
-                      {(data.isLow || data.isOver) && data.budget > 0 && (
-                        <span className="text-red-500 font-bold" title="¡Presupuesto bajo o excedido!">
-                          ⚠️
-                        </span>
-                      )}
-                    </span>
-                    <span className="text-xs text-text-secondary font-medium">
-                      {formatCurrency(data.spent)} / {formatCurrency(data.budget)}
-                    </span>
-                  </div>
-                  
-                  <div className="w-full bg-white border-2 border-black rounded-full h-3 overflow-hidden shadow-[2px_2px_0px_#000]">
-                    <div 
-                      className={`h-full border-r-2 border-black transition-all duration-500 ${getProgressColor(data.percentage)}`} 
-                      style={{ width: `${data.percentage}%` }}
-                    ></div>
-                  </div>
-                  
-                  {data.budget > 0 && (
-                    <p className={`text-[10px] text-right mt-1 ${data.isOver ? "text-red-500 font-bold" : "text-text-tertiary"}`}>
-                      {data.isOver 
-                        ? `Excedido por ${formatCurrency(Math.abs(data.remaining))}` 
-                        : `Disponible: ${formatCurrency(data.remaining)}`
-                      }
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <button 
+              onClick={() => setColumns(c => c === 1 ? 2 : 1)}
+              className="text-[10px] font-bold text-black uppercase tracking-wider bg-white px-2 py-1 rounded-pill border-2 border-black shadow-[2px_2px_0px_#000] neo-button"
+            >
+              {columns === 1 ? "Ver 2 Columnas" : "Ver 1 Columna"}
+            </button>
           </div>
-        ))}
-      </div>
+          <div className={`grid gap-4 ${columns === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          {budgetData.map(cat => {
+            const totalSpent = cat.membersData.reduce((sum, d) => sum + d.spent, 0);
+            const totalBudget = cat.membersData.reduce((sum, d) => sum + d.budget, 0);
+            return (
+              <div key={cat.id} className="bg-white p-4 rounded-xl neo-border neo-shadow-sm flex flex-col">
+                <div className="flex justify-between items-start mb-3 border-b-2 border-black pb-2">
+                  <h3 className="font-extrabold text-black text-sm uppercase truncate pr-2">{cat.name}</h3>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-xs font-bold text-black">{formatCurrency(totalSpent)}</p>
+                    {totalBudget > 0 && <p className="text-[10px] text-text-tertiary font-bold">de {formatCurrency(totalBudget)}</p>}
+                  </div>
+                </div>
+                
+                <div className="space-y-4 flex-1">
+                  {cat.membersData.map(data => (
+                    <div key={data.email}>
+                      <div className="flex justify-between items-end mb-1">
+                        <span className="text-xs font-bold text-text-secondary flex items-center gap-1 w-1/2 truncate">
+                          {data.email.split("@")[0]}
+                          {(data.isLow || data.isOver) && data.budget > 0 && (
+                            <span className="text-red-500 font-bold" title="¡Presupuesto bajo o excedido!">
+                              ⚠️
+                            </span>
+                          )}
+                        </span>
+                        <span className="text-xs text-black font-bold">
+                          {formatCurrency(data.spent)} / {formatCurrency(data.budget)}
+                        </span>
+                      </div>
+                      
+                      <div className="w-full bg-white border-2 border-black rounded-full h-3 overflow-hidden shadow-[2px_2px_0px_#000]">
+                        <div 
+                          className={`h-full border-r-2 border-black transition-all duration-500 ${getProgressColor(data.percentage)}`} 
+                          style={{ width: `${data.percentage}%` }}
+                        ></div>
+                      </div>
+                      
+                      {data.budget > 0 && (
+                        <p className={`text-[10px] text-right mt-1 font-bold ${data.isOver ? "text-red-600" : "text-black"}`}>
+                          {data.isOver 
+                            ? `Excedido por ${formatCurrency(Math.abs(data.remaining))}` 
+                            : `Disponible: ${formatCurrency(data.remaining)}`
+                          }
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+          </div>
+        </div>
     )}
 
     </>
